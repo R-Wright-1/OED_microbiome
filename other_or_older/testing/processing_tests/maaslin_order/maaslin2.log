@@ -1,0 +1,68 @@
+2022-07-15 10:47:36 INFO::Writing function arguments to log file
+2022-07-15 10:47:36 DEBUG::Function arguments
+2022-07-15 10:47:36 DEBUG::Output folder: /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_order
+2022-07-15 10:47:36 DEBUG::Min Abundance: 0.000000
+2022-07-15 10:47:36 DEBUG::Min Prevalence: 0.100000
+2022-07-15 10:47:36 DEBUG::Normalization: TSS
+2022-07-15 10:47:36 DEBUG::Transform: AST
+2022-07-15 10:47:36 DEBUG::Analysis method: LM
+2022-07-15 10:47:36 DEBUG::Max significance: 0.250000
+2022-07-15 10:47:36 DEBUG::Random effects:
+2022-07-15 10:47:36 DEBUG::Fixed effects: Progression
+2022-07-15 10:47:36 DEBUG::Correction method: BH
+2022-07-15 10:47:36 DEBUG::Standardize: FALSE
+2022-07-15 10:47:36 DEBUG::Cores: 1
+2022-07-15 10:47:36 INFO::Verifying options selected are valid
+2022-07-15 10:47:36 INFO::Determining format of input files
+2022-07-15 10:47:36 INFO::Input format is data samples as rows and metadata samples as rows
+2022-07-15 10:47:36 DEBUG::A total of 90 samples were found in both the data and metadata
+2022-07-15 10:47:36 DEBUG::Reordering data/metadata to use same sample ordering
+2022-07-15 10:47:36 INFO::Formula for fixed effects: expr ~  Progression
+2022-07-15 10:47:36 INFO::Filter data based on min abundance and min prevalence
+2022-07-15 10:47:36 INFO::Total samples in data: 90
+2022-07-15 10:47:36 INFO::Min samples required with min abundance for a feature not to be filtered: 9.000000
+2022-07-15 10:47:36 INFO::Total filtered features: 42
+2022-07-15 10:47:36 INFO::Filtered feature names from abundance and prevalence filtering: o__0319.6G20, o__Acetobacterales, o__Anaerolineales, o__Armatimonadales, o__Babeliales, o__Candidatus_Amesbacteria, o__Candidatus_Kaiserbacteria, o__Candidatus_Nomurabacteria, o__Candidatus_Zambryskibacteria, o__Chitinophagales, o__Chthoniobacterales, o__Cyanobacteriales, o__Cytophagales, o__Deinococcales, o__Desulfobulbales, o__Gemmatales, o__JGI_0000069.P22, o__Microtrichales, o__Mycoplasmatales, o__Obscuribacterales, o__Oscillospirales, o__Parcubacteria, o__Peptococcales, o__Polyangiales, o__Pseudonocardiales, o__RF39, o__Reyranellales, o__Rhodobacterales, o__Rickettsiales, o__Rubrobacterales, o__Streptomycetales, o__Thermaerobacterales, o__Thermales, o__Thermicanales, o__Thermomicrobiales, o__Tistrellales, o__Unclassified.c__Bacilli, o__Unclassified.c__Cyanobacteriia, o__Unclassified.c__Gammaproteobacteria, o__Unclassified.c__Parcubacteria, o__Verrucomicrobiales, o__uncultured
+2022-07-15 10:47:36 INFO::Total filtered features with variance filtering: 0
+2022-07-15 10:47:36 INFO::Filtered feature names from variance filtering:
+2022-07-15 10:47:36 INFO::Running selected normalization method: TSS
+2022-07-15 10:47:36 INFO::Bypass z-score application to metadata
+2022-07-15 10:47:36 INFO::Running selected transform method: AST
+2022-07-15 10:47:36 INFO::Running selected analysis method: LM
+2022-07-15 10:47:36 INFO::Fitting model to feature number 1, o__Absconditabacteriales_.SR1.
+2022-07-15 10:47:36 INFO::Fitting model to feature number 2, o__Actinomycetales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 3, o__Bacillales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 4, o__Bacteroidales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 5, o__Bifidobacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 6, o__Burkholderiales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 7, o__Campylobacterales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 8, o__Cardiobacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 9, o__Caulobacterales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 10, o__Clostridia_UCG.014
+2022-07-15 10:47:36 INFO::Fitting model to feature number 11, o__Coriobacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 12, o__Corynebacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 13, o__Erysipelotrichales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 14, o__Flavobacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 15, o__Fusobacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 16, o__Lachnospirales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 17, o__Lactobacillales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 18, o__Micrococcales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 19, o__Pasteurellales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 20, o__Peptostreptococcales.Tissierellales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 21, o__Propionibacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 22, o__Pseudomonadales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 23, o__Rhizobiales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 24, o__Saccharimonadales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 25, o__Sphingobacteriales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 26, o__Sphingomonadales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 27, o__Spirochaetales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 28, o__Staphylococcales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 29, o__Synergistales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 30, o__Unclassified.c__Actinobacteria
+2022-07-15 10:47:36 INFO::Fitting model to feature number 31, o__Veillonellales.Selenomonadales
+2022-07-15 10:47:36 INFO::Fitting model to feature number 32, o__Xanthomonadales
+2022-07-15 10:47:36 INFO::Counting total values for each feature
+2022-07-15 10:47:36 INFO::Writing residuals to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_order/residuals.rds
+2022-07-15 10:47:36 INFO::Writing fitted values to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_order/fitted.rds
+2022-07-15 10:47:36 INFO::Writing all results to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_order/all_results.tsv
+2022-07-15 10:47:36 INFO::Writing the significant results (those which are less than or equal to the threshold of 0.250000 ) to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_order/significant_results.tsv

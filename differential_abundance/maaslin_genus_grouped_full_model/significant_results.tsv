@@ -1,0 +1,4 @@
+feature	metadata	value	coef	stderr	N	N.not.0	pval	qval
+g__Lautropia	Time_to_progression_grouped	3<4	0.136243413	0.035357084	90	34	0.000236176	0.043220117
+g__Unclassified.c__Actinobacteria	Time_to_progression_grouped	>6	0.096603093	0.024486261	90	15	0.000169449	0.043220117
+g__Cardiobacterium	Time_to_progression_grouped	3<4	0.093323088	0.02568609	90	29	0.000483715	0.059013275

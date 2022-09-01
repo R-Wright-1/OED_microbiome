@@ -1,0 +1,99 @@
+2022-07-13 11:54:43 INFO::Writing function arguments to log file
+2022-07-13 11:54:43 DEBUG::Function arguments
+2022-07-13 11:54:43 DEBUG::Output folder: /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus
+2022-07-13 11:54:43 DEBUG::Min Abundance: 0.000000
+2022-07-13 11:54:43 DEBUG::Min Prevalence: 0.100000
+2022-07-13 11:54:43 DEBUG::Normalization: TSS
+2022-07-13 11:54:43 DEBUG::Transform: AST
+2022-07-13 11:54:43 DEBUG::Analysis method: LM
+2022-07-13 11:54:43 DEBUG::Max significance: 0.250000
+2022-07-13 11:54:43 DEBUG::Random effects:
+2022-07-13 11:54:43 DEBUG::Fixed effects: Progression
+2022-07-13 11:54:43 DEBUG::Correction method: BH
+2022-07-13 11:54:43 DEBUG::Standardize: FALSE
+2022-07-13 11:54:43 DEBUG::Cores: 1
+2022-07-13 11:54:43 INFO::Verifying options selected are valid
+2022-07-13 11:54:43 INFO::Determining format of input files
+2022-07-13 11:54:43 INFO::Input format is data samples as rows and metadata samples as rows
+2022-07-13 11:54:43 DEBUG::A total of 90 samples were found in both the data and metadata
+2022-07-13 11:54:43 DEBUG::Reordering data/metadata to use same sample ordering
+2022-07-13 11:54:43 INFO::Formula for fixed effects: expr ~  Progression
+2022-07-13 11:54:43 INFO::Filter data based on min abundance and min prevalence
+2022-07-13 11:54:43 INFO::Total samples in data: 90
+2022-07-13 11:54:43 INFO::Min samples required with min abundance for a feature not to be filtered: 9.000000
+2022-07-13 11:54:43 INFO::Total filtered features: 170
+2022-07-13 11:54:43 INFO::Filtered feature names from abundance and prevalence filtering: g__0319.6G20.c__Oligoflexia, g__Acetobacter, g__Acidovorax, g__Acinetobacter, g__Aerococcus, g__Aestuariimicrobium, g__Alloscardovia, g__Altererythrobacter, g__Alysiella, g__Anaerococcus, g__Anaeroglobus, g__Anoxybacillus, g__Arcicella, g__Armatimonas, g__Atopococcus, g__Babeliales, g__Bacillus, g__Bacteroides, g__Bifidobacterium, g__Bosea, g__Brachymonas, g__Brevundimonas, g__Bulleidia, g__Butyrivibrio, g__CL500.29_marine_group.f__Ilumatobacteraceae, g__Candidatus_Alysiosphaera, g__Candidatus_Amesbacteria, g__Candidatus_Kaiserbacteria, g__Candidatus_Nomurabacteria, g__Candidatus_Saccharimonas, g__Candidatus_Zambryskibacteria, g__Chryseobacterium, g__Cloacibacterium, g__Comamonas, g__DEV007.o__Verrucomicrobiales, g__Defluviitaleaceae_UCG.011, g__Deinococcus, g__Delftia, g__Dermacoccus, g__Desulfobulbus, g__Devosia, g__Dolosigranulum, g__Edaphobaculum, g__Eggerthia, g__Enhydrobacter, g__Enterococcus, g__Erysipelotrichaceae_UCG.006, g__Filifactor, g__Fimbriiglobus, g__Flavisolibacter, g__Flavobacterium, g__Flexilinea, g__Gardnerella, g__Geobacillus, g__Helicobacter, g__Herbaspirillum, g__Incertae_Sedis, g__JG30.KF.CM45.o__Thermomicrobiales, g__JGI_0000069.P22.c__Gracilibacteria, g__Johnsonella, g__Kocuria, g__Lactobacillus, g__Lawsonella, g__Lentimicrobium, g__Limnohabitans, g__Luteolibacter, g__Lysinibacillus, g__Marmoricola, g__Meiothermus, g__Methylobacterium.Methylorubrum, g__Methylotenera, g__Microbacterium, g__Micrococcus, g__Moheibacter, g__Moraxella, g__Mycoplasma, g__NS11.12_marine_group.o__Sphingobacteriales, g__NS9_marine_group.o__Flavobacteriales, g__Nocardioides, g__Novosphingobium, g__Obscuribacteraceae, g__Ochrobactrum, g__Olsenella, g__Paenarthrobacter, g__Pajaroellobacter, g__Paracoccus, g__Parcubacteria, g__Pedobacter, g__Pelomonas, g__Peptococcus, g__Peptostreptococcus, g__Phocaeicola, g__Phreatobacter, g__Prauserella, g__Propionibacterium, g__Propionivibrio, g__Proteiniphilum, g__Pseudomonas, g__Pseudorhodobacter, g__Pseudoxanthomonas, g__Qipengyuania, g__RF39.c__Bacilli, g__Reyranella, g__Rhizobiaceae, g__Rhodococcus, g__Rhodoluna, g__Rikenellaceae_RC9_gut_group, g__Roseomonas, g__Rubrobacter, g__Rurimicrobium, g__Sandarakinorhabdus, g__Scardovia, g__Schlegelella, g__Shuttleworthia, g__Simonsiella, g__Sneathia, g__Sphingobacterium, g__Sphingobium, g__Stenotrophomonas, g__Streptobacillus, g__Streptomyces, g__Tepidimonas, g__Tepidiphilus, g__Terrimonas, g__Tetragenococcus, g__Thermaerobacter, g__Thermicanus, g__Turicella, g__Turicibacter, g__Tychonema_CCAP_1459.11B, g__Uliginosibacterium, g__Unclassified.c__Bacilli, g__Unclassified.c__Cyanobacteriia, g__Unclassified.c__Gammaproteobacteria, g__Unclassified.c__Parcubacteria, g__Unclassified.f__Anaerolineaceae, g__Unclassified.f__Caulobacteraceae, g__Unclassified.f__Chitinophagaceae, g__Unclassified.f__Comamonadaceae, g__Unclassified.f__Moraxellaceae, g__Unclassified.f__Nostocaceae, g__Unclassified.f__Oxalobacteraceae, g__Unclassified.f__Pasteurellaceae, g__Unclassified.f__Peptostreptococcaceae, g__Unclassified.f__Pseudonocardiaceae, g__Unclassified.f__Rhodobacteraceae, g__Unclassified.f__Saccharimonadaceae, g__Unclassified.f__Sphingomonadaceae, g__Unclassified.f__Xanthobacteraceae, g__Unclassified.o__Babeliales, g__Unclassified.o__Bacteroidales, g__Unclassified.o__Chthoniobacterales, g__Unclassified.o__Fusobacteriales, g__Unclassified.o__Rhizobiales, g__Variovorax, g__Vulcaniibacterium, g__Xanthomonas, g__Zoogloea, g__.Eubacterium._brachy_group, g__.Eubacterium._saphenum_group, g__.Eubacterium._yurii_group, g__env.OPS_17.o__Sphingobacteriales, g__uncultured.c__Actinobacteria, g__uncultured.f__Chitinophagaceae, g__uncultured.f__Gemmataceae, g__uncultured.f__Lachnospiraceae, g__uncultured.f__Leptotrichiaceae, g__uncultured.f__Neisseriaceae, g__uncultured.f__Rickettsiaceae, g__uncultured.f__Saprospiraceae
+2022-07-13 11:54:43 INFO::Total filtered features with variance filtering: 0
+2022-07-13 11:54:43 INFO::Filtered feature names from variance filtering:
+2022-07-13 11:54:43 INFO::Running selected normalization method: TSS
+2022-07-13 11:54:43 INFO::Bypass z-score application to metadata
+2022-07-13 11:54:43 INFO::Running selected transform method: AST
+2022-07-13 11:54:43 INFO::Running selected analysis method: LM
+2022-07-13 11:54:43 INFO::Fitting model to feature number 1, g__Abiotrophia
+2022-07-13 11:54:43 INFO::Fitting model to feature number 2, g__Absconditabacteriales_.SR1.
+2022-07-13 11:54:43 INFO::Fitting model to feature number 3, g__Actinobacillus
+2022-07-13 11:54:43 INFO::Fitting model to feature number 4, g__Actinomyces
+2022-07-13 11:54:43 INFO::Fitting model to feature number 5, g__Aggregatibacter
+2022-07-13 11:54:43 INFO::Fitting model to feature number 6, g__Alloprevotella
+2022-07-13 11:54:43 INFO::Fitting model to feature number 7, g__Atopobium
+2022-07-13 11:54:43 INFO::Fitting model to feature number 8, g__Bergeyella
+2022-07-13 11:54:43 INFO::Fitting model to feature number 9, g__Bradyrhizobium
+2022-07-13 11:54:43 INFO::Fitting model to feature number 10, g__Burkholderia.Caballeronia.Paraburkholderia
+2022-07-13 11:54:43 INFO::Fitting model to feature number 11, g__Campylobacter
+2022-07-13 11:54:43 INFO::Fitting model to feature number 12, g__Capnocytophaga
+2022-07-13 11:54:43 INFO::Fitting model to feature number 13, g__Cardiobacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 14, g__Catonella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 15, g__Centipeda
+2022-07-13 11:54:44 INFO::Fitting model to feature number 16, g__Clostridia_UCG.014
+2022-07-13 11:54:44 INFO::Fitting model to feature number 17, g__Corynebacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 18, g__Cutibacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 19, g__Dialister
+2022-07-13 11:54:44 INFO::Fitting model to feature number 20, g__Eikenella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 21, g__F0058.f__Paludibacteraceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 22, g__F0332.f__Actinomycetaceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 23, g__Fretibacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 24, g__Fusobacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 25, g__Gemella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 26, g__Granulicatella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 27, g__Haemophilus
+2022-07-13 11:54:44 INFO::Fitting model to feature number 28, g__Kingella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 29, g__Lachnoanaerobaculum
+2022-07-13 11:54:44 INFO::Fitting model to feature number 30, g__Lautropia
+2022-07-13 11:54:44 INFO::Fitting model to feature number 31, g__Leptotrichia
+2022-07-13 11:54:44 INFO::Fitting model to feature number 32, g__Megasphaera
+2022-07-13 11:54:44 INFO::Fitting model to feature number 33, g__Mogibacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 34, g__Neisseria
+2022-07-13 11:54:44 INFO::Fitting model to feature number 35, g__Oribacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 36, g__P5D1.392.o__Lactobacillales
+2022-07-13 11:54:44 INFO::Fitting model to feature number 37, g__Parvimonas
+2022-07-13 11:54:44 INFO::Fitting model to feature number 38, g__Porphyromonas
+2022-07-13 11:54:44 INFO::Fitting model to feature number 39, g__Prevotella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 40, g__Pseudopropionibacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 41, g__Ralstonia
+2022-07-13 11:54:44 INFO::Fitting model to feature number 42, g__Rothia
+2022-07-13 11:54:44 INFO::Fitting model to feature number 43, g__Saccharimonadaceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 44, g__Saccharimonadales
+2022-07-13 11:54:44 INFO::Fitting model to feature number 45, g__Selenomonas
+2022-07-13 11:54:44 INFO::Fitting model to feature number 46, g__Solobacterium
+2022-07-13 11:54:44 INFO::Fitting model to feature number 47, g__Sphingomonas
+2022-07-13 11:54:44 INFO::Fitting model to feature number 48, g__Staphylococcus
+2022-07-13 11:54:44 INFO::Fitting model to feature number 49, g__Stomatobaculum
+2022-07-13 11:54:44 INFO::Fitting model to feature number 50, g__Streptococcus
+2022-07-13 11:54:44 INFO::Fitting model to feature number 51, g__TM7a.f__Saccharimonadaceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 52, g__TM7x.f__Saccharimonadaceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 53, g__Tannerella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 54, g__Treponema
+2022-07-13 11:54:44 INFO::Fitting model to feature number 55, g__Unclassified.c__Actinobacteria
+2022-07-13 11:54:44 INFO::Fitting model to feature number 56, g__Unclassified.f__Rhizobiaceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 57, g__Unclassified.f__Selenomonadaceae
+2022-07-13 11:54:44 INFO::Fitting model to feature number 58, g__Unclassified.o__Lactobacillales
+2022-07-13 11:54:44 INFO::Fitting model to feature number 59, g__Veillonella
+2022-07-13 11:54:44 INFO::Fitting model to feature number 60, g__.Eubacterium._nodatum_group
+2022-07-13 11:54:44 INFO::Fitting model to feature number 61, g__uncultured.f__Caulobacteraceae
+2022-07-13 11:54:44 INFO::Counting total values for each feature
+2022-07-13 11:54:44 WARNING::Deleting existing residuals file: /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus/residuals.rds
+2022-07-13 11:54:44 INFO::Writing residuals to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus/residuals.rds
+2022-07-13 11:54:44 WARNING::Deleting existing fitted file: /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus/fitted.rds
+2022-07-13 11:54:44 INFO::Writing fitted values to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus/fitted.rds
+2022-07-13 11:54:44 INFO::Writing all results to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus/all_results.tsv
+2022-07-13 11:54:44 INFO::Writing the significant results (those which are less than or equal to the threshold of 0.250000 ) to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_genus/significant_results.tsv

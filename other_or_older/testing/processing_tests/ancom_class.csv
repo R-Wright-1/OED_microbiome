@@ -1,0 +1,15 @@
+"","taxa_id","W","detected_0.9","detected_0.8","detected_0.7","detected_0.6"
+"1","c__Actinobacteria",0,FALSE,FALSE,FALSE,FALSE
+"2","c__Alphaproteobacteria",0,FALSE,FALSE,FALSE,FALSE
+"3","c__Bacilli",0,FALSE,FALSE,FALSE,FALSE
+"4","c__Bacteroidia",0,FALSE,FALSE,FALSE,FALSE
+"5","c__Campylobacteria",0,FALSE,FALSE,FALSE,FALSE
+"6","c__Clostridia",0,FALSE,FALSE,FALSE,FALSE
+"7","c__Coriobacteriia",0,FALSE,FALSE,FALSE,FALSE
+"8","c__Fusobacteriia",0,FALSE,FALSE,FALSE,FALSE
+"9","c__Gammaproteobacteria",0,FALSE,FALSE,FALSE,FALSE
+"10","c__Gracilibacteria",0,FALSE,FALSE,FALSE,FALSE
+"11","c__Negativicutes",0,FALSE,FALSE,FALSE,FALSE
+"12","c__Saccharimonadia",0,FALSE,FALSE,FALSE,FALSE
+"13","c__Spirochaetia",0,FALSE,FALSE,FALSE,FALSE
+"14","c__Synergistia",Inf,TRUE,TRUE,TRUE,TRUE

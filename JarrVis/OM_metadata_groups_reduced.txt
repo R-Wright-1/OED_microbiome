@@ -1,0 +1,91 @@
+sample_id	study_ID1	study_ID	Storage	patient_age	sex	ethnicity_details	TotalWeeklyAlcoholUnits	smoking_status	SMK_Pack_Year_total	Index_BX_year	Index_BX_DATE	diagnosis	anatomical_site	Progression	progression_year	Date_of_progression	Total_Number_of_Months_Followed_to_Progression	date_of_last_visit  	Total_Number_of_Months_Followed_or_to_Progression	Total_Number_of_Months_Followed	Time_to_progression_grouped	Time_to_progression	Group
+1035	1035_S97	A1	Frozen	51.9	male	white	0	never	0	2005	8/15/2005	mild dysplasia	palate or gingiva	no progression				3/23/2012	79.3	79.3	NP		4
+1072	1072_S109	B1	Frozen	54.3	male	white	0	never	0	2003	4/3/2003	mild dysplasia	palate or gingiva	no progression				10/4/2007	54.1	54.1	NP		4
+1163	1163_S145	E1	Frozen	83.2	male	white	2	never	0	1997	4/14/1997	moderate dysplasia	tongue	no progression				6/14/2000	38	38	NP		10
+1314	1314_S181	H1	Frozen	61.2	male	white	0	ever	0.5	2007	8/31/2007	moderate dysplasia	tongue	no progression				5/1/2009	20	20	NP		6
+1351	1351_S122	C2	Frozen	57.2	female	white	12	ever	33.2	2001	2/3/2001	mild dysplasia	tongue	no progression				9/10/2008	91.3	91.3	NP		3
+1365	1365_S134	D2	Frozen	52.1	male	south asian	15	never	0	2001	1/11/2001	moderate dysplasia	tongue	no progression				5/25/2015	172.5	172.5	NP		12
+1380	1380_S158	F2	Frozen	49.5	female	asian	0	never	0	2001	7/6/2001	mild dysplasia	tongue	no progression				8/5/2011	121.1	121.1	NP		14
+1431	1431_S182	H2	Frozen	81.6	female	white	1	never	0	2002	3/15/2002	mild dysplasia	tongue	no progression				8/9/2006	52.9	52.9	NP		1
+1493	1493_S135	E3	Frozen	54	male	white	1	ever	4.5	2002	9/6/2002	mild dysplasia	buccal labial mucosa	no progression				3/18/2015	150.4	150.4	NP		30
+1512	1512_S142	G3	Frozen	45.5	male	white	12	ever	32.73	2003	12/3/2003	moderate dysplasia	tongue	no progression				4/25/2013	112.8	122	NP		6
+1552	1552_S159	H3	Frozen	77.4	male	white	1	never	0	2002	12/13/2002	mild dysplasia	tongue	no progression				3/11/2013	123	123	NP		10
+1560	1560_S171	A4	Frozen	42.7	female	asian	0	never	0	2003	6/24/2003	mild dysplasia	tongue	no progression				3/17/2011	92.8	92.8	NP		14
+1574	1574_S183	B4	Frozen	59.3	female	white	4	ever	3	2003	9/23/2003	mild dysplasia	tongue	no progression				7/12/2006	33.6	33.6	NP		9
+1607	1607_S112	D4	Frozen	56.9	male	white	0	never	0	2006	11/14/2006	mild dysplasia	tongue	no progression				9/2/2015	105.7	105.7	NP		11
+1630	1630_S124	F4	Frozen	72.8	female	white	0	never	0	2003	10/23/2003	moderate dysplasia	tongue	no progression				10/23/2014	132.1	132.1	NP		7
+1639	1639_S136	G4	Frozen	62.5	female	white	0	never	0	2005	7/26/2005	mild dysplasia	buccal labial mucosa	no progression				7/3/2014	107.3	107.3	NP		19
+1650	1650_S148	H4	Frozen	75.2	male	white	0	ever	24	2003	7/30/2003	mild dysplasia	palate or gingiva	no progression				8/12/2011	96.5	96.5	NP		8
+1655	1655_S160	A5	Frozen	67.6	female	white	0	ever	1.65	2004	7/30/2004	mild dysplasia	floor of mouth	no progression				7/22/2015	131.8	131.8	NP		13
+1661	1661_S172	B5	Frozen	76.1	female	white	2	ever	0.2	2004	8/17/2004	moderate dysplasia	floor of mouth	no progression				8/15/2011	84	84	NP		13
+1667	1667_S184	C5	Frozen	54.9	male	white	30	ever	16	2004	7/27/2004	mild dysplasia	tongue	no progression				5/2/2014	117.2	117.2	NP		16
+1730	1730_S101	D5	Frozen	52	male	white	0	ever	14.5	2005	5/19/2005	mild dysplasia	buccal labial mucosa	no progression				10/14/2015	124.9	124.9	NP		30
+1806	1806_S137	H5	Frozen	71.3	male	white	3	never	0	2006	4/27/2006	moderate dysplasia	tongue	no progression				7/13/2012	74.6	74.6	NP		11
+1818	1818_S149	A6	Frozen	45.7	female	white	1	never	0	2006	8/15/2006	mild dysplasia	tongue	no progression				2/15/2012	66.1	66.1	NP		7
+1822	1822_S161	B6	Frozen	51.3	male	white	13	never	0	2007	3/23/2007	moderate dysplasia	tongue	no progression				6/29/2015	99.3	99.3	NP		23
+1825	1825_S173	C6	Frozen	54.3	female	white	0	never	0	2006	8/17/2006	mild dysplasia	tongue	no progression				11/16/2011	63	63	NP		17
+1864	1864_S178	D6	Frozen	59.2	female	asian	0	ever	1	2005	11/17/2005	moderate dysplasia	tongue	no progression				8/11/2009	44.8	44.8	NP		18
+1876	1876_S102	F6	Frozen	57	male	white	14	ever	29.75	2007	4/23/2007	moderate dysplasia	tongue	no progression				4/10/2014	83.6	83.6	NP		20
+1913	1913_S114	G6	Frozen	80.3	female	white	3	never	0	2007	6/16/2007	moderate dysplasia	tongue	no progression				8/19/2015	98.2	98.2	NP		17
+2024	2024_S150	B7	Frozen	69.5	male	asian	2	never	0	2009	6/5/2009	moderate dysplasia	tongue	no progression				7/20/2015	73.5	73.5	NP		12
+2028	2028_S162	C7	Frozen	57.5	female	white	12	ever	14.99	2009	3/24/2009	moderate dysplasia	tongue	no progression				4/30/2015	73.2	73.2	NP		3
+2074	2074_S174	D7	Frozen	59.4	female	white	3	never	0	2009	11/9/2009	moderate dysplasia	buccal labial mucosa	no progression				5/27/2015	66.6	66.6	NP		19
+2088	2088_S186	E7	Frozen	48.7	male	asian	4	never	0	2010	1/14/2010	moderate dysplasia	tongue	no progression				3/18/2015	62.1	62.1	NP		22
+2118	2118_S115	H7	Frozen	66.6	male	white	60	ever	26.49	2009	11/16/2009	moderate dysplasia	tongue	no progression				11/4/2013	47.6	47.6	NP		16
+2137	2137_S107	A8	Pcyt	61.4	male	south asian	1.5	never	0	2011	7/7/2011	mild dysplasia	tongue	no progression				1/8/2015	42.1	42.1	NP		22
+3003	3003_S127	B8	Frozen	73.6	female	white	3	never	0	2005	6/23/2005	mild dysplasia	tongue	no progression				5/5/2011	70.4	70.4	NP		21
+3011	3011_S139	C8	Frozen	60.2	male	white	45	ever	18.5	2004	11/16/2004	mild dysplasia	tongue	no progression				11/20/2014	120.2	120.2	NP		24
+3012	3012_S119	D8	Frozen	76.4	male	white	0	never	0	2004	11/9/2004	moderate dysplasia	soft palate	no progression				10/6/2010	70.9	70.9	NP		29
+3021	3021_S151	E8	Frozen	44.7	female	white	15	ever	25.25	2004	11/23/2004	moderate dysplasia	floor of mouth	no progression				11/23/2012	96.1	96.1	NP		15
+3022	3022_S163	F8	Frozen	54	female	white	0	never	0	2004	12/6/2004	moderate dysplasia	tongue	no progression				5/29/2014	113.8	113.8	NP		21
+3024	3024_S175	G8	Frozen	48.8	female	white	8	never	0	2005	1/25/2005	mild dysplasia	tongue	no progression				5/30/2013	100.2	100.2	NP		25
+3031	3031_S187	H8	Frozen	69.7	female	white	0	never	0	2005	8/4/2005	mild dysplasia	tongue	no progression				9/18/2014	109.5	109.5	NP		25
+3036	3036_S104	A9	Frozen	64.6	female	white	5	never	0	2006	1/26/2006	moderate dysplasia	tongue	no progression				7/10/2014	101.5	101.5	NP		26
+3040	3040_S116	B9	Frozen	76.8	female	asian	0	ever	18.5	2005	11/1/2005	mild dysplasia	tongue	no progression				11/7/2013	96.3	96.3	NP		18
+3046	3046_S131	C9	Frozen	52.4	male	white	8	never	0	2006	1/17/2006	moderate dysplasia	tongue	no progression				5/1/2014	99.5	99.5	NP		23
+3048	3048_S128	D9	Frozen	65	female	white	0	never	0	2005	10/31/2005	moderate dysplasia	tongue	no progression				2/13/2013	87.5	87.5	NP		26
+3049	3049_S140	E9	Frozen	58.5	male	white	5	never	0	2005	12/15/2005	mild dysplasia	tongue	no progression				5/24/2012	77.3	77.3	NP		2
+3052	3052_S143	F9	Frozen	62.9	female	white	20	ever	18.6	2006	1/16/2006	moderate dysplasia	floor of mouth	no progression				10/25/2007	21.3	21.3	NP		15
+3053	3053_S152	G9	Frozen	67.3	male	white	5	ever	10.2	2001	1/19/2001	mild dysplasia	palate or gingiva	no progression				1/8/2015	167.7	164.3	NP		8
+3059	3059_S164	H9	Frozen	56.8	female	white	10	ever	23.25	2006	3/20/2006	mild dysplasia	tongue	no progression				1/29/2015	106.4	106.4	NP		9
+3060	3060_S176	A10	Frozen	59.7	female	white	0	never	0	2006	11/2/2006	mild dysplasia	tongue	no progression				11/18/2010	48.6	48.6	NP		27
+3063	3063_S188	B10	Frozen	70.7	male	white	6	never	0	2006	9/19/2006	mild dysplasia	tongue	no progression				11/28/2013	86.4	86.4	NP		2
+3073	3073_S117	D10	Frozen	51.7	male	white	5	ever	26	2006	12/18/2006	mild dysplasia	tongue	no progression				6/19/2008	18	18	NP		20
+3086	3086_S141	F10	Frozen	46.6	female	white	0	never	0	2007	5/22/2007	moderate dysplasia	tongue	no progression				10/8/2009	28.6	28.6	NP		27
+3087	3087_S153	G10	Frozen	46.6	female	south asian	0	never	0	2007	5/31/2007	moderate dysplasia	tongue	no progression				11/20/2014	89.8	89.8	NP		28
+3191	3191_S106	D11	Frozen	56.4	male	south asian	0	never	0	2010	5/21/2010	mild dysplasia	soft palate	no progression				12/4/2014	54.5	54.5	NP		29
+3213	3213_S179	F11	Pcyt	58.2	male	white	30	ever	21.95	2012	1/10/2012	moderate dysplasia	tongue	no progression				11/27/2014	34.6	34.6	NP		24
+3217	3217_S132	G11	Frozen	50.7	female	white	0	ever	5.7	2011	7/8/2011	mild dysplasia	tongue	no progression				12/4/2014	40.9	40.9	NP		1
+3222	3222_S191	H11	Pcyt	61.9	female	white	2	ever	13.5	2011	10/6/2011	mild dysplasia	tongue	no progression				2/12/2015	40.3	40.3	NP		5
+8223	8223_S108	A12	Pcyt	62.6	female	south asian	1	never	0	2012	6/12/2012	mild dysplasia	tongue	no progression				12/18/2014	30.2	30.2	NP		28
+8288	8288_S118	B12	Frozen	68	female	white	14	ever	0.9	2007	10/25/2007	moderate dysplasia	tongue	no progression				1/8/2015	86.5	86.5	NP		5
+1799	1799_S166	G5	Frozen	47.6	female	asian	0	ever	1.2	2006	3/10/2006	moderate dysplasia	tongue	progression	2006	6/7/2006	2.9	6/6/2014	2.9	99	<1	2.9	18
+1973	1973_S138	A7	Frozen	79.2	female	white	1	never	0	2008	6/3/2008	moderate dysplasia	tongue	progression	2008	10/15/2008	4.4	6/30/2009	4.4	12.9	<1	4.4	21
+1758	1758_S113	E5	Frozen	59.8	male	white	50	ever	12	2005	12/6/2005	mild dysplasia	tongue	progression	2006	7/10/2006	7.1	6/13/2014	7.1	102.3	<1	7.1	16
+3080	3080_S129	E10	Frozen	59.5	female	white	1	never	0	2007	1/2/2007	mild dysplasia	tongue	progression	2007	8/23/2007	7.7	5/19/2011	7.7	52.5	<1	7.7	25
+1457	1457_S130	B3	Frozen	79	male	white	0	never	0	2005	4/12/2005	moderate dysplasia	tongue	progression	2006	3/14/2006	11	10/10/2007	11	30	<1	11	10
+3162	3162_S189	B11	Frozen	44.1	female	white	3	never	0	2009	7/10/2009	moderate dysplasia	tongue	progression	2010	8/19/2010	13.3	8/19/2010	13.3	13.3	1<2	13.3	27
+1466	1466_S111	C3	Frozen	55.2	male	white	20	never	0	2003	2/4/2003	moderate dysplasia	tongue	progression	2004	4/5/2004	14	4/14/2014	14	134.4	1<2	14	11
+3128	3128_S177	A11	Frozen	49.4	female	white	0	never	0	2008	9/5/2008	moderate dysplasia	tongue	progression	2010	1/21/2010	16.5	1/23/2015	16.5	76.6	1<2	16.5	26
+3090	3090_S165	H10	Frozen	52.5	male	white	7	never	0	2007	8/28/2007	moderate dysplasia	tongue	progression	2009	3/26/2009	18.9	10/24/2014	18.9	85.9	1<2	18.9	2
+1386	1386_S170	G2	Frozen	72	male	white	16	ever	81	2001	10/24/2001	mild dysplasia	palate or gingiva	progression	2003	6/2/2003	19.3	2/23/2004	19.3	28	1<2	19.3	8
+3068	3068_S105	C10	Frozen	68	male	white	24	ever	43.75	2007	2/6/2007	moderate dysplasia	tongue	progression	2009	3/10/2009	25.1	8/10/2015	25.1	102.1	2<3	25.1	24
+3201	3201_S167	E11	Frozen	78.5	male	white	7	never	0	2010	10/14/2010	moderate dysplasia	soft palate	progression	2013	1/24/2013	27.4	1/24/2013	27.4	27.4	2<3	27.4	29
+1585	1585_S100	C4	Frozen	55.1	female	asian	0	never	0	2002	9/10/2002	mild dysplasia	tongue	progression	2005	2/21/2005	29.4	6/13/2014	29.4	127.1	2<3	29.4	14
+1343	1343_S98	A2	Frozen	67.6	female	white	14	ever	16.4	2001	11/7/2001	mild dysplasia	tongue	progression	2004	6/24/2004	31.6	8/10/2011	31.6	117.1	2<3	31.6	5
+1496	1496_S147	F3	Frozen	60.9	female	asian	0	never	0	2002	4/23/2002	moderate dysplasia	floor of mouth	progression	2005	3/16/2005	34.8	9/1/2005	34.8	40.3	2<3	34.8	13
+1488	1488_S123	D3	Frozen	72.1	male	asian	0	never	0	2002	6/10/2002	moderate dysplasia	tongue	progression	2005	6/20/2005	36.4	1/31/2014	36.4	139.8	3<4	36.4	12
+1871	1871_S185	E6	Frozen	50.3	female	white	0	never	0	2007	2/21/2007	moderate dysplasia	buccal labial mucosa	progression	2010	3/24/2010	37.1	3/24/2010	37.1	37.1	3<4	37.1	19
+3173	3173_S155	C11	Pcyt	59.8	female	other	0	never	0	2012	8/16/2012	moderate dysplasia	tongue	progression	2015	10/23/2015	38.2	10/23/2015	38.2	38.2	3<4	38.2	28
+8876	8876_S120	C12	Pcyt	62.6	male	white	0	ever	4.3	2008	7/22/2008	moderate dysplasia	buccal labial mucosa	progression	2011	11/1/2011	39.4	11/1/2011	39.4	39.4	3<4	39.4	30
+1244	1244_S169	G1	Frozen	57.6	male	white	2	never	0	2000	6/15/2000	mild dysplasia	palate or gingiva	progression	2004	2/19/2004	44.2	7/24/2015	44.2	181.4	3<4	44.2	4
+2104	2104_S103	F7	Frozen	48.5	male	other	7	never	0	2010	6/7/2010	moderate dysplasia	tongue	progression	2014	4/10/2014	46.1	4/10/2014	46.1	46.1	3<4	46.1	22
+2108	2108_S190	G7	Frozen	62.8	male	white	2	never	0	2011	1/13/2011	moderate dysplasia	tongue	progression	2015	8/18/2015	55.2	8/18/2015	55.2	55.2	4<6	55.2	23
+1774	1774_S125	F5	Frozen	42.4	female	white	7	never	0	2006	11/17/2006	moderate dysplasia	tongue	progression	2012	1/4/2012	61.6	1/4/2012	61.6	61.6	4<6	61.6	17
+1441	1441_S99	A3	Frozen	63.7	female	white	0	ever	47.35	2001	2/16/2001	mild dysplasia	tongue	progression	2006	6/13/2006	63.9	12/12/2006	63.9	69.9	4<6	63.9	9
+1347	1347_S110	B2	Frozen	51.7	male	white	12	ever	1.8	2001	2/15/2001	moderate dysplasia	tongue	progression	2007	1/2/2007	70.6	10/16/2013	70.6	152.1	4<6	70.6	6
+1972	1972_S126	H6	Frozen	43.8	male	white	15	ever	53	2008	4/3/2008	moderate dysplasia	tongue	progression	2014	2/26/2014	70.8	2/26/2014	70.8	70.8	4<6	70.8	20
+1167	1167_S157	F1	Frozen	45.2	female	white	14	ever	12	1999	3/10/1999	mild dysplasia	tongue	progression	2005	9/7/2005	78	4/10/2013	78	169.2	>6	78	3
+1608	1608_S154	E4	Frozen	55.1	female	white	20	ever	41.5	2003	11/6/2003	moderate dysplasia	floor of mouth	progression	2012	3/28/2012	100.8	4/30/2014	100.8	125.9	>6	100.8	15
+1368	1368_S146	E2	Frozen	74.3	female	white	3	never	0	2001	5/29/2001	moderate dysplasia	tongue	progression	2011	1/19/2011	115.8	1/19/2011	115.8	115.8	>6	115.8	7
+1133	1133_S133	D1	Pcyt	60.1	female	white	4	never	0	1999	7/15/1999	mild dysplasia	tongue	progression	2010	1/18/2010	126.2	3/19/2012	126.2	152.3	>6	126.2	1

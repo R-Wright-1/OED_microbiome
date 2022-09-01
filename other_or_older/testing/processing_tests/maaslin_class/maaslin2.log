@@ -1,0 +1,50 @@
+2022-07-15 10:49:00 INFO::Writing function arguments to log file
+2022-07-15 10:49:00 DEBUG::Function arguments
+2022-07-15 10:49:00 DEBUG::Output folder: /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_class
+2022-07-15 10:49:00 DEBUG::Min Abundance: 0.000000
+2022-07-15 10:49:00 DEBUG::Min Prevalence: 0.100000
+2022-07-15 10:49:00 DEBUG::Normalization: TSS
+2022-07-15 10:49:00 DEBUG::Transform: AST
+2022-07-15 10:49:00 DEBUG::Analysis method: LM
+2022-07-15 10:49:00 DEBUG::Max significance: 0.250000
+2022-07-15 10:49:00 DEBUG::Random effects:
+2022-07-15 10:49:00 DEBUG::Fixed effects: Progression
+2022-07-15 10:49:00 DEBUG::Correction method: BH
+2022-07-15 10:49:00 DEBUG::Standardize: FALSE
+2022-07-15 10:49:00 DEBUG::Cores: 1
+2022-07-15 10:49:00 INFO::Verifying options selected are valid
+2022-07-15 10:49:00 INFO::Determining format of input files
+2022-07-15 10:49:00 INFO::Input format is data samples as rows and metadata samples as rows
+2022-07-15 10:49:00 DEBUG::A total of 90 samples were found in both the data and metadata
+2022-07-15 10:49:00 DEBUG::Reordering data/metadata to use same sample ordering
+2022-07-15 10:49:00 INFO::Formula for fixed effects: expr ~  Progression
+2022-07-15 10:49:00 INFO::Filter data based on min abundance and min prevalence
+2022-07-15 10:49:00 INFO::Total samples in data: 90
+2022-07-15 10:49:00 INFO::Min samples required with min abundance for a feature not to be filtered: 9.000000
+2022-07-15 10:49:00 INFO::Total filtered features: 17
+2022-07-15 10:49:00 INFO::Filtered feature names from abundance and prevalence filtering: c__Acidimicrobiia, c__Anaerolineae, c__Armatimonadia, c__Babeliae, c__Chloroflexia, c__Cyanobacteriia, c__Deinococci, c__Desulfobulbia, c__Microgenomatia, c__Oligoflexia, c__Parcubacteria, c__Planctomycetes, c__Polyangia, c__Rubrobacteria, c__Thermaerobacteria, c__Vampirivibrionia, c__Verrucomicrobiae
+2022-07-15 10:49:00 INFO::Total filtered features with variance filtering: 0
+2022-07-15 10:49:00 INFO::Filtered feature names from variance filtering:
+2022-07-15 10:49:00 INFO::Running selected normalization method: TSS
+2022-07-15 10:49:00 INFO::Bypass z-score application to metadata
+2022-07-15 10:49:00 INFO::Running selected transform method: AST
+2022-07-15 10:49:00 INFO::Running selected analysis method: LM
+2022-07-15 10:49:00 INFO::Fitting model to feature number 1, c__Actinobacteria
+2022-07-15 10:49:00 INFO::Fitting model to feature number 2, c__Alphaproteobacteria
+2022-07-15 10:49:00 INFO::Fitting model to feature number 3, c__Bacilli
+2022-07-15 10:49:00 INFO::Fitting model to feature number 4, c__Bacteroidia
+2022-07-15 10:49:00 INFO::Fitting model to feature number 5, c__Campylobacteria
+2022-07-15 10:49:00 INFO::Fitting model to feature number 6, c__Clostridia
+2022-07-15 10:49:00 INFO::Fitting model to feature number 7, c__Coriobacteriia
+2022-07-15 10:49:00 INFO::Fitting model to feature number 8, c__Fusobacteriia
+2022-07-15 10:49:00 INFO::Fitting model to feature number 9, c__Gammaproteobacteria
+2022-07-15 10:49:00 INFO::Fitting model to feature number 10, c__Gracilibacteria
+2022-07-15 10:49:00 INFO::Fitting model to feature number 11, c__Negativicutes
+2022-07-15 10:49:00 INFO::Fitting model to feature number 12, c__Saccharimonadia
+2022-07-15 10:49:00 INFO::Fitting model to feature number 13, c__Spirochaetia
+2022-07-15 10:49:00 INFO::Fitting model to feature number 14, c__Synergistia
+2022-07-15 10:49:00 INFO::Counting total values for each feature
+2022-07-15 10:49:00 INFO::Writing residuals to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_class/residuals.rds
+2022-07-15 10:49:00 INFO::Writing fitted values to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_class/fitted.rds
+2022-07-15 10:49:00 INFO::Writing all results to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_class/all_results.tsv
+2022-07-15 10:49:00 INFO::Writing the significant results (those which are less than or equal to the threshold of 0.250000 ) to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_class/significant_results.tsv

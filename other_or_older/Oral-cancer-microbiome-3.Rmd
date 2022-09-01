@@ -1,0 +1,2364 @@
+---
+title: "Oral cancer microbiome 3"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+  pdf_document:
+    toc: yes
+---
+
+# QIIME2
+
+```{bash, eval=FALSE}
+conda activate qiime2-2022.2
+
+run_pear.pl -g -p 4 -o stitched_reads/ raw_data/*
+
+rename 's/.assembled/_R1_001/' stitched_reads/*.assembled*
+rm stitched_reads/*discarded*
+rm stitched_reads/*unassembled*
+
+mkdir reads_qza
+
+qiime tools import \
+   --type SampleData[SequencesWithQuality] \
+   --input-path stitched_reads/ \
+   --output-path reads_qza/reads_stitched.qza \
+   --input-format CasavaOneEightSingleLanePerSampleDirFmt
+   
+qiime demux summarize \
+   --i-data reads_qza/reads_stitched.qza \
+   --o-visualization reads_qza/reads_stitched_summary.qzv
+   
+qiime cutadapt trim-single \
+   --i-demultiplexed-sequences reads_qza/reads_stitched.qza \
+   --p-cores 24 \
+   --p-front ^AGRGTTTGATCMTGGCTCAG \
+   --p-adapter GWATTACCGCGGCKGCTG$ \
+   --p-discard-untrimmed \
+   --p-no-indels \
+   --o-trimmed-sequences reads_qza/reads_trimmed_joined.qza
+   
+qiime quality-filter q-score \
+   --i-demux reads_qza/reads_trimmed_joined.qza \
+   --o-filter-stats filt_stats.qza \
+   --o-filtered-sequences reads_qza/reads_trimmed_joined_filt.qza
+   
+qiime demux summarize \
+   --i-data reads_qza/reads_trimmed_joined_filt.qza \
+   --o-visualization reads_qza/reads_trimmed_joined_filt_summary.qzv
+
+## DADA2
+
+mkdir dada2_out_l270
+qiime dada2 denoise-single \
+  --i-demultiplexed-seqs reads_qza/reads_trimmed_joined_filt.qza \
+  --p-trunc-len 270 \
+  --p-max-ee 2 \
+  --p-n-threads 24 \
+  --o-table dada2_out_l270/table.qza \
+  --o-representative-sequences dada2_out_l270/representative_sequences.qza \
+  --o-denoising-stats dada2_out_l270/stats.qza
+   
+qiime feature-table summarize \
+   --i-table dada2_out_l270/table.qza \
+   --o-visualization dada2_out_l270/dada2_table_summary.qzv
+   
+qiime tools export \
+  --input-path dada2_out_l270/stats.qza \
+  --output-path exports
+mv exports/stats.tsv exports/dada2_l270_stats.tsv
+
+qiime feature-classifier classify-sklearn \
+   --i-reads dada2_out_l270/representative_sequences.qza \
+   --i-classifier /home/shared/taxa_classifiers/qiime2-2022.2_classifiers/silva-138-99-nb-classifier.qza \
+   --p-n-jobs 24 \
+   --output-dir taxa_l270_dada2
+   
+qiime tools export \
+   --input-path taxa_l270_dada2/classification.qza --output-path taxa_l270_dada2
+   
+qiime feature-table tabulate-seqs --i-data dada2_out_l270/representative_sequences.qza \
+                                  --o-visualization dada2_out_l270/representative_sequences.qzv
+                                  
+qiime feature-table filter-features \
+   --i-table dada2_out_l270/table.qza \
+   --p-min-frequency 10 \
+   --p-min-samples 3 \
+   --o-filtered-table dada2_out_l270/dada2_table_filt.qza
+
+qiime taxa filter-table \
+   --i-table dada2_out_l270/dada2_table_filt.qza \
+   --i-taxonomy taxa_l270_dada2/classification.qza \
+   --p-include p__ \
+   --p-exclude mitochondria,chloroplast \
+   --o-filtered-table dada2_out_l270/dada2_table_filt_contam.qza
+   
+qiime feature-table summarize \
+   --i-table dada2_out_l270/dada2_table_filt_contam.qza \
+   --o-visualization dada2_out_l270/dada2_table_filt_contam_summary.qzv
+   
+qiime feature-table filter-features \
+   --i-table dada2_out_l270/table.qza \
+   --p-min-frequency 10 \
+   --p-min-samples 1 \
+   --o-filtered-table dada2_out_l270/dada2_table_filt_no_prev.qza
+
+qiime taxa filter-table \
+   --i-table dada2_out_l270/dada2_table_filt_no_prev.qza \
+   --i-taxonomy taxa_l270_dada2/classification.qza \
+   --p-include p__ \
+   --p-exclude mitochondria,chloroplast \
+   --o-filtered-table dada2_out_l270/dada2_table_filt_contam_no_prev.qza
+   
+qiime feature-table summarize \
+   --i-table dada2_out_l270/dada2_table_filt_contam_no_prev.qza \
+   --o-visualization dada2_out_l270/dada2_table_filt_contam_no_prev_summary.qzv
+   
+# no prevalence filtering is what we'll use, as for some samples we lose ~50% of reads
+
+#not filtering out any samples as the lowest has ~8,000 reads
+
+cp dada2_out_l270/dada2_table_filt_contam_no_prev.qza dada2_table_final.qza
+   
+qiime diversity alpha-rarefaction \
+   --i-table dada2_table_final.qza \
+   --p-max-depth 48793 \
+   --p-steps 20 \
+   --p-metrics 'observed_features' \
+   --o-visualization rarefaction_curves.qzv
+   
+qiime feature-table filter-seqs \
+   --i-data dada2_out_l270/representative_sequences.qza \
+   --i-table dada2_table_final.qza \
+   --o-filtered-data dada2_out_l270/rep_seqs_final.qza
+   
+qiime feature-table summarize \
+   --i-table dada2_table_final.qza \
+   --o-visualization dada2_table_final_summary.qzv
+   
+qiime tools export \
+  --input-path dada2_out_l270/rep_seqs_final.qza \
+  --output-path exports
+  
+sed -i -e '1 s/Feature/#Feature/' -e '1 s/Taxon/taxonomy/' taxa_l270_dada2/taxonomy.tsv
+
+qiime tools export \
+  --input-path dada2_table_final.qza \
+  --output-path exports
+  
+biom add-metadata \
+  -i exports/feature-table.biom \
+  -o exports/feature-table_w_tax.biom \
+  --observation-metadata-fp taxa_l270_dada2/taxonomy.tsv \
+  --sc-separated taxonomy
+  
+biom convert \
+  -i exports/feature-table_w_tax.biom \
+  -o exports/feature-table_w_tax.txt \
+  --to-tsv \
+  --header-key taxonomy
+   
+qiime fragment-insertion sepp \
+   --i-representative-sequences dada2_out_l270/rep_seqs_final.qza \
+   --i-reference-database /home/shared/rRNA_db/16S/sepp-refs-gg-13-8.qza \
+   --o-tree asvs-tree.qza \
+   --o-placements insertion-placements.qza \
+   --p-threads 24
+
+qiime tools export \
+  --input-path asvs-tree.qza \
+  --output-path exports
+
+```
+
+Deleted the first row of the feature-table_w_tax.txt file.
+
+# R/Python
+
+```{R, results='hide', fig.keep='all', message=FALSE, eval=FALSE}
+library(reticulate)
+library(ALDEx2)
+library(Maaslin2)
+library(ape)
+library("survminer")
+# library(dplyr)
+# library(exactRankTests)
+# library(ggplot2)
+# library(ggnewscale)
+# library(nlme)
+# library(philr)
+library(phyloseq)
+library(vegan)
+library(tidyr)
+# library(compositions)
+conda_python(envname = 'r-reticulate', conda = "auto")
+```
+
+```{python, results='hide', fig.keep='all', include=FALSE, eval=FALSE}
+import os
+import pandas as pd
+import pickle
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Ellipse
+import matplotlib.transforms as transforms
+import numpy as np
+from scipy.stats import mannwhitneyu
+from skbio.stats import ordination
+from skbio.diversity import alpha_diversity
+from skbio.diversity import beta_diversity
+from deicode.preprocessing import rclr
+from Bio import Phylo
+from skbio.tree import TreeNode
+from skbio import read
+import random
+from ete3 import Tree
+
+folder = '/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/'
+colors = {'progression':'#CD5C5C', 'no progression':'#2980B9'}
+colors_time_groups = {'NP':'#2980B9', '<1':'#A93226', '1<2':'#E74C3C', '2<3':'#DC7633', '3<4':'#FF7043', '4<6':'#F4D03F', '>6':'#AFB42B', 'Other':'k'}
+
+ft_relabun_fn, ft_rare_fn, ft_rclr_fn, genus_relabun_fn, genus_rare_fn, genus_rclr_fn = folder+'processing/ft_relabun.csv', folder+'processing/ft_rare.csv', folder+'processing/ft_rclr.csv', folder+'processing/genus_relabun.csv', folder+'processing/genus_rare.csv', folder+'processing/genus_rclr.csv'
+tree_fn, genus_tree_fn = folder+'qiime2/exports/tree.nwk', folder+'processing/genus_tree.nwk'
+agglom_relabun_ft, agglom_rclr_ft = folder+'processing/agglom_relabun.csv', folder+'processing/agglom_rclr.csv'
+agglom_tree_fn = folder+'processing/agglom_tree.tree'
+```
+
+```{python, eval=FALSE}
+def draw_tree(tree, orient_tree='horizontal', vert_orient='down', axes=None, label_func=str, span=355, plot_labels=True, end_same=True, fs=10):
+    # Arrays that store lines for the plot of clades
+    horizontal_linecollections = []
+    vertical_linecollections = []
+    def get_x_positions(tree):
+        """Create a mapping of each clade to its horizontal position.
+        Dict of {clade: x-coord}
+        """
+        depths = tree.depths()
+        # If there are no branch lengths, assume unit branch lengths
+        if not max(depths.values()):
+            depths = tree.depths(unit_branch_lengths=True)
+        return depths
+    def format_branch_label(clade):
+                return None
+    def get_y_positions(tree):
+        """Create a mapping of each clade to its vertical position.
+        Dict of {clade: y-coord}.
+        Coordinates are negative, and integers for tips.
+        """
+        maxheight = tree.count_terminals()
+        # Rows are defined by the tips
+        heights = {tip: maxheight - i for i, tip in enumerate(reversed(tree.get_terminals()))}
+        # Internal nodes: place at midpoint of children
+        def calc_row(clade):
+            for subclade in clade:
+                if subclade not in heights:
+                    calc_row(subclade)
+            # Closure over heights
+            heights[clade] = (
+                heights[clade.clades[0]] + heights[clade.clades[-1]]
+            ) / 2.0
+        if tree.root.clades:
+            calc_row(tree.root)
+        return heights
+    x_posns = get_x_positions(tree)
+    y_posns = get_y_positions(tree)
+    if axes is None:
+        fig = plt.figure()
+        if orient_tree == 'circular':
+            axes = fig.add_subplot(1, 1, 1, orientation='polar')
+        else:
+            axes = fig.add_subplot(1, 1, 1)
+    elif not isinstance(axes, plt.matplotlib.axes.Axes):
+        raise ValueError("Invalid argument for axes: %s" % axes)
+    leaves = [['Label', 'x loc', 'y loc', 'rotation', 'va', 'ha']]
+    def draw_clade_lines(orientation="horizontal",y_here=0,x_start=0,x_here=0,y_bot=0,y_top=0,color="black",lw=".1", ls='-'):
+        """Create a line.
+        Graphical formatting of the lines representing clades in the plot can be
+        customized by altering this function.
+        """
+        if orientation == "horizontal":
+            axes.hlines(y_here, x_start, x_here, color=color, lw=lw, linestyle=ls)
+        elif orientation == "vertical":
+            axes.vlines(x_here, y_bot, y_top, color=color, linestyle=ls)
+    def draw_clade(clade, x_start, color, lw, orient_tree='horizontal', vert_orient='up'):
+        """Recursively draw a tree, down from the given clade."""
+        x_here = x_posns[clade]
+        y_here = y_posns[clade]
+        xmax = max(x_posns.values())+max(x_posns.values())/30
+        # phyloXML-only graphics annotations
+        if hasattr(clade, "color") and clade.color is not None:
+            color = clade.color.to_hex()
+        if hasattr(clade, "width") and clade.width is not None:
+            lw = clade.width * plt.rcParams["lines.linewidth"]
+        if orient_tree == 'horizontal':
+            # Draw a horizontal line from start to here
+            draw_clade_lines(orientation='horizontal',y_here=y_here,x_start=x_start,x_here=x_here,color=color,lw=lw)
+            if clade.name != None and end_same and '__' not in clade.name:
+                draw_clade_lines(orientation='horizontal',y_here=y_here,x_start=xmax,x_here=x_here,color=color,lw=lw-1, ls='-.')
+            # Add node/taxon labels
+            if clade.name not in (None, clade.__class__.__name__):
+                label = label_func(clade.name)
+                if end_same: xplc = xmax
+                else: xplc = x_here
+                if plot_labels: axes.text(xplc, y_here, " %s" % label, verticalalignment="center", horizontalalignment='left', color='k', fontsize=fs)
+                leaves.append([label, xplc, y_here, 0, 'center', 'left']) 
+            if clade.clades:
+                # Draw a vertical line connecting all children
+                y_top = y_posns[clade.clades[0]]
+                y_bot = y_posns[clade.clades[-1]]
+                # Only apply widths to horizontal lines, like Archaeopteryx
+                draw_clade_lines(orientation='vertical',x_here=x_here,y_bot=y_bot,y_top=y_top,color=color,lw=lw)
+                # Draw descendents
+                for child in clade:
+                    draw_clade(child, x_here, color, lw)
+        elif orient_tree == 'vertical':
+                draw_clade_lines(orientation='vertical', x_here=y_here, y_bot=x_start, y_top=x_here,color=color,lw=lw)
+                if clade.name != None and end_same and '__' not in clade.name:
+                    draw_clade_lines(orientation='vertical',x_here=y_here, y_bot=xmax, y_top=x_here,color=color,lw=lw-1, ls='-.')
+                if clade.name not in (None, clade.__class__.__name__):
+                    label = label_func(clade.name)
+                    if end_same: xplc = xmax
+                    else: xplc = x_here
+                    if vert_orient == 'up':
+                        if plot_labels: axes.text(y_here, xplc,  " %s" % label, verticalalignment='bottom', horizontalalignment='center', color='k', rotation=90, fontsize=fs)
+                        leaves.append([label, y_here, xplc, 90, 'bottom', 'center']) 
+                    elif vert_orient == 'down':
+                        if plot_labels: axes.text(y_here, xplc,  " %s" % label, verticalalignment='top', horizontalalignment='center', color='k', rotation=90, fontsize=fs)
+                        leaves.append([label, y_here, xplc, 90, 'top', 'center']) 
+                if clade.clades:
+                    y_top = y_posns[clade.clades[0]]
+                    y_bot = y_posns[clade.clades[-1]]
+                    draw_clade_lines(orientation='horizontal', y_here=x_here, x_start=y_bot, x_here=y_top, color=color,lw=lw)
+                    for child in clade:
+                        draw_clade(child, x_here, color, lw, orient_tree='vertical', vert_orient=vert_orient)
+    def draw_clade_polar(clade, color, lw, x_start=0.1, y_start=0, span=360):
+        ymax = max(y_posns.values())
+        yang = span/ymax
+        xmax = max(x_posns.values())+max(x_posns.values())/30
+        x_here = x_posns[clade]
+        y_here = y_posns[clade]
+        rad = span*np.pi/180
+        rad = rad/ymax
+        if y_start == 0:
+            y_start = rad*y_start
+        y_here = rad*y_here
+        if x_here != 0: 
+            axes.plot([y_start, y_here], [x_start, x_here], color=color, lw=lw)
+            if clade.name != None and end_same and '__' not in clade.name:
+                axes.plot([y_start, y_here], [x_here, xmax], color=color, lw=lw-1, linestyle='-.')
+        if clade.name not in (None, clade.__class__.__name__):
+            label = label_func(clade.name)
+            rot = y_here*(180/np.pi)
+            if end_same: xplc = xmax
+            else: xplc = x_here
+            if rot <= 90: va, ha = 'center', 'left'
+            elif rot <= 180: va, ha, rot = 'center', 'right', rot-180
+            elif rot <= 270: va, ha, rot = 'center', 'right', rot-180
+            else: va, ha = 'center', 'left'
+            if plot_labels: axes.text(y_here, xplc, label, color='k', rotation=rot, rotation_mode='anchor', va=va, ha=ha, fontsize=fs)
+            leaves.append([label, y_here, xplc, rot, va, ha])
+        if clade.clades:
+            y_top = y_posns[clade.clades[0]]
+            y_bot = y_posns[clade.clades[-1]]
+            y_top = y_top*yang*np.pi/180
+            y_bot = y_bot*yang*np.pi/180
+            curve = [[y_bot, y_top], [x_here, x_here]]
+            x = np.linspace(curve[0][0], curve[0][1], 500)
+            y = interp1d(curve[0], curve[1])(x)
+            axes.plot(x, y, color=color, lw=lw)
+            ymin, ymax = min(x), max(x)
+            ydiff = ymax-ymin
+            count = [1 for child in clade]
+            count = sum(count)-2
+            locs = [ymin]
+            for a in range(count):
+                locs.append(ydiff/(count+1)+ymin)
+            locs.append(ymax)
+            count = 0
+            for child in clade:
+                if child.name != None: 
+                    y_start = y_posns[child]*rad
+                else:
+                    y_start = locs[count]
+                draw_clade_polar(child, color, lw, x_start=x_here, y_start=y_start, span=span)
+                count += 1
+    plt.sca(axes)
+    if orient_tree in ['horizontal', 'vertical']:
+        draw_clade(tree.root, 0, "k", plt.rcParams["lines.linewidth"], orient_tree=orient_tree, vert_orient=vert_orient)
+        if orient_tree == 'horizontal':
+            xmax = max(x_posns.values())
+            axes.set_xlim(-0.05 * xmax, 1.25 * xmax)
+            # Also invert the y-axis (origin at the top)
+            # Add a small vertical margin, but avoid including 0 and N+1 on the y axis
+            axes.set_ylim(max(y_posns.values()) + 0.8, 0.2)
+        elif orient_tree == 'vertical':
+            axes.set_xlim(max(y_posns.values()) + 0.8, 0.2)
+            xmax = max(x_posns.values())
+            if vert_orient == 'up':
+                axes.set_ylim(-0.05 * xmax, 1.25 * xmax)
+            elif vert_orient == 'down':
+                axes.set_ylim(1.25 * xmax, -0.05 * xmax)
+        axes.set_xticks([]), axes.set_yticks([])
+    elif orient_tree == 'circular':
+        print('Note that if you provided an axes for this then it must be polar orientation or it will probably look very strange')
+        x_start = 0
+        y_start = 0
+        draw_clade_polar(tree.root, "k", plt.rcParams["lines.linewidth"], x_start=x_start, y_start=y_start, span=span)
+        axes.set_ylim([0, max(x_posns.values())])
+        axes.yaxis.grid(False)
+        axes.set_xticks([])
+        axes.set_yticklabels([])
+    return leaves
+
+def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
+    """
+    Create a plot of the covariance confidence ellipse of *x* and *y*.
+    Parameters
+    x, y : array-like, shape (n, )
+    ----------
+        Input data.
+    ax : matplotlib.axes.Axes
+        The axes object to draw the ellipse into.
+    n_std : float
+        The number of standard deviations to determine the ellipse's radiuses.
+    **kwargs
+        Forwarded to `~matplotlib.patches.Ellipse`
+    Returns
+    -------
+    matplotlib.patches.Ellipse
+    """
+    if x.size != y.size:
+        raise ValueError("x and y must be the same size")
+    cov = np.cov(x, y)
+    pearson = cov[0, 1]/np.sqrt(cov[0, 0] * cov[1, 1])
+    # Using a special case to obtain the eigenvalues of this
+    # two-dimensionl dataset.
+    ell_radius_x = np.sqrt(1 + pearson)
+    ell_radius_y = np.sqrt(1 - pearson)
+    ellipse = Ellipse((0, 0), width=ell_radius_x * 2, height=ell_radius_y * 2,
+                      facecolor=facecolor, **kwargs)
+    # Calculating the stdandard deviation of x from
+    # the squareroot of the variance and multiplying
+    # with the given number of standard deviations.
+    scale_x = np.sqrt(cov[0, 0]) * n_std
+    mean_x = np.mean(x)
+    # calculating the stdandard deviation of y ...
+    scale_y = np.sqrt(cov[1, 1]) * n_std
+    mean_y = np.mean(y)
+    transf = transforms.Affine2D() \
+        .rotate_deg(45) \
+        .scale(scale_x, scale_y) \
+        .translate(mean_x, mean_y)
+    ellipse.set_transform(transf + ax.transData)
+    return ax.add_patch(ellipse)
+```
+
+## Import data {.tabset}
+
+### Get matched samples
+
+```{python, eval=FALSE}
+matched_cases = pd.read_csv(folder+'OralOM_Matched_Cases.csv', header=0)
+md = pd.read_csv(folder+'OM_metadata.csv', index_col=2, header=0)
+matches_dict = {}
+for row in matched_cases.index:
+  case = str(matched_cases.loc[row, 'Matched_case'])
+  control = str(matched_cases.loc[row, 'STUDY ID'])
+  if control == '3223': control = '8223'
+  if case == control: continue
+  if case in matches_dict: matches_dict[case].append(control)
+  else: matches_dict[case] = [control]
+
+with open(folder+'processing/matches.dict', 'wb') as f:
+    pickle.dump(matches_dict, f)
+    
+case_control_group_num = {}
+count = 1
+for match in matches_dict:
+  case_control_group_num[match] = str(count)
+  matches = matches_dict[match]
+  for m in matches:
+    case_control_group_num[m] = str(count)
+  count += 1
+
+col_to_add = []
+for row in md.index:
+  col_to_add.append(case_control_group_num[str(row)])
+
+md['Group'] = col_to_add
+md.to_csv(folder+'OM_metadata_groups.csv')
+    
+end = True
+```
+
+### Get taxonomy
+
+```{python, eval=FALSE}
+ft = pd.read_csv(folder+'qiime2/exports/feature-table_w_tax.txt', index_col=0, header=0, sep='\t')
+#make a dictionary to convert ASV names to taxonomy
+tax_dict = {}
+for row in ft.index.values:
+  tax_dict[row] = ft.loc[row, 'taxonomy']
+
+#give each ASV all levels, but below the lowest classification they'll just say e.g. 'Unclassified g__Prevotella'
+levels = ['d__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__']
+for tax in tax_dict:
+  full_tax = tax_dict[tax]
+  for l in range(len(levels)):
+    level = levels[l]
+    if level not in full_tax:
+      new_tax = full_tax
+      last = full_tax.split('; ')[-1]
+      if len(levels[l:]) == 1:
+        new_tax += '; '+level+'Unclassified '+last
+        tax_dict[tax] = new_tax
+        break
+      else: 
+        for lvl in levels[l:]:
+          new_tax += '; '+lvl+'Unclassified '+last
+        tax_dict[tax] = new_tax
+        break
+
+#give all ASVs a number
+asv_dict = {}
+count = 1
+for row in ft.index.values:
+  asv_dict[row] = 'ASV'+str(count)
+  count += 1
+  
+#save the ASV dictionary
+with open(folder+'processing/asv.dict', 'wb') as f:
+  pickle.dump(asv_dict, f)
+
+#make a dataframe of the new taxonomy and add ASV numbers before saving
+tax_new = pd.DataFrame.from_dict(tax_dict, orient='index').rename(columns={0:'Taxonomy'})
+tax_new['ASV'] = ''
+for tax in tax_new.index.values:
+  tax_new.loc[tax, 'ASV'] = asv_dict[tax]
+tax_new.to_csv(folder+'processing/taxonomy.csv')
+
+#add the ASV numbers to the taxonomy dictionary
+for tax in tax_dict:
+  tax_dict[tax] = tax_dict[tax]+'; '+asv_dict[tax]
+
+#save the taxonomy dictionary
+with open(folder+'processing/tax.dict', 'wb') as f:
+  pickle.dump(tax_dict, f)
+
+#save a feature table with the ASV names
+ft = ft.rename(index=asv_dict)
+ft.to_csv(folder+'processing/asv_raw.csv')
+```
+
+### Get feature table normalised
+
+```{python, eval=FALSE}
+#open the feature table
+ft = pd.read_csv(folder+'qiime2/exports/feature-table_w_tax.txt', index_col=0, header=0, sep='\t').drop(['taxonomy'], axis=1)
+
+#get the ASV name dictionary
+with open(folder+'processing/asv.dict', 'rb') as f:
+  asv_dict = pickle.load(f)
+
+#convert the feature table to relative abundance
+ft_relabun = ft.copy(deep=True)
+ft_relabun = ft_relabun.divide(ft_relabun.sum(axis=0), axis=1).multiply(100)
+ft_relabun.to_csv(folder+'processing/ft_relabun.csv')
+
+#rename the feature table to ASV names
+asv_relabun = ft_relabun.rename(index=asv_dict)
+asv_relabun.to_csv(folder+'processing/asv_relabun.csv')
+
+#convert the feature table to Robust CLR
+ft_rclr = ft.copy(deep=True)
+X = ft_rclr.iloc[0:].values
+this_ft_rclr = rclr(X)
+ft_rclr = pd.DataFrame(this_ft_rclr, columns=ft_rclr.columns, index=ft_rclr.index.values).fillna(value=0)
+ft_rclr.to_csv(folder+'processing/ft_rclr.csv')
+
+#rename the feature table to ASV names
+asv_rclr = ft_rclr.rename(index=asv_dict)
+asv_rclr.to_csv(folder+'processing/asv_rclr.csv')
+```
+
+### Rarefy feature table
+
+```{R, eval=FALSE}
+ft = py$ft
+table_num = data.matrix(ft[,1:90]) #convert the ASV table to a numeric matric
+rownames(table_num) = rownames(ft)
+table = otu_table(table_num, taxa_are_rows = TRUE)
+physeq = phyloseq(table)
+physeq_rare <- rarefy_even_depth(physeq, sample.size = min(sample_sums(physeq)), replace = TRUE, trimOTUs = TRUE, verbose = TRUE)
+table_rare = data.frame(otu_table(physeq_rare))
+write.csv(table_rare, paste(py$folder, 'processing/ft_rare.csv', sep=''))
+```
+
+Sort column names after R:
+```{python, eval=FALSE}
+ft_rare = pd.read_csv(folder+'processing/ft_rare.csv', index_col=0, header=0)
+col_names = {}
+for col in ft_rare.columns:
+  col_names[col] = col.replace('X', '')
+ft_rare = ft_rare.rename(columns=col_names)
+ft_rare.to_csv(folder+'processing/ft_rare.csv')
+
+#rename the feature table to ASV names
+asv_rare = ft_rare.rename(index=asv_dict)
+asv_rare.to_csv(folder+'processing/asv_rare.csv')
+```
+
+### Group feature tables to genus
+
+```{python, eval=FALSE}
+ft_fn, ft_rare_fn, ft_relabun_fn, ft_rclr_fn = 'qiime2/exports/feature-table_w_tax.txt', 'processing/ft_rare.csv', 'processing/ft_relabun.csv', 'processing/ft_rclr.csv'
+genus_fn, genus_rare_fn, genus_relabun_fn, genus_rclr_fn = 'processing/genus.csv', 'processing/genus_rare.csv', 'processing/genus_relabun.csv', 'processing/genus_rclr.csv'
+names = [ft_fn, ft_rare_fn, ft_relabun_fn, ft_rclr_fn]
+genus_names = [genus_fn, genus_rare_fn, genus_relabun_fn, genus_rclr_fn]
+
+with open(folder+'processing/tax.dict', 'rb') as f:
+  tax_dict = pickle.load(f)
+
+for n in range(len(names)):
+  name = names[n]
+  if name == ft_fn: df = pd.read_csv(folder+name, index_col=0, header=0, sep='\t').drop(['taxonomy'], axis=1)
+  else: df = pd.read_csv(folder+name, index_col=0, header=0)
+  genus_rename = {}
+  for row in df.index.values:
+    gen = tax_dict[row].split('; ')[-3]
+    if gen == 'g__uncultured':
+      if 'uncultured' in tax_dict[row].split('; ')[-4]:
+        gen = tax_dict[row].split('; ')[-3]+' '+tax_dict[row].split('; ')[-6]
+      else:
+        gen = tax_dict[row].split('; ')[-3]+' '+tax_dict[row].split('; ')[-4]
+    elif gen in ['g__CL500-29_marine_group', 'g__F0058', 'g__F0332', 'g__TM7a', 'g__TM7x']:
+      gen = tax_dict[row].split('; ')[-3]+' '+tax_dict[row].split('; ')[-4]
+    elif gen in ['g__DEV007', 'g__env.OPS_17', 'g__JG30-KF-CM45', 'g__NS11-12_marine_group', 'g__NS9_marine_group', 'g__P5D1-392']:
+      gen = tax_dict[row].split('; ')[-3]+' '+tax_dict[row].split('; ')[-5]
+    elif gen in ['g__0319-6G20', 'g__JGI_0000069-P22', 'g__RF39']:
+      gen = tax_dict[row].split('; ')[-3]+' '+tax_dict[row].split('; ')[-6]
+    genus_rename[row] = gen
+  genus = df.rename(index=genus_rename)
+  genus = genus.groupby(by=genus.index, axis=0).sum()
+  genus.to_csv(folder+genus_names[n])
+
+with open(folder+'processing/genus.dict', 'wb') as f:
+  pickle.dump(genus_rename, f)
+  
+for asv in tax_new.index.values:
+  tax = tax_new.loc[asv, 'Taxonomy']
+  tax = tax.split('; ')
+  new_tax_string = ''
+  for t in range(len(tax)):
+    if t == 5: new_tax_string += genus_rename[asv].replace(' ', '_')+'; '
+    elif t == 6: new_tax_string += tax[t]
+    else: new_tax_string += tax[t]+'; '
+  #if 'RF' in new_tax_string: print(new_tax_string)
+  tax_new.loc[asv, 'Taxonomy'] = new_tax_string
+
+
+ft = pd.read_csv(folder+'qiime2/exports/feature-table_w_tax.txt', index_col=0, header=0, sep='\t').drop(['taxonomy'], axis=1)
+
+```
+
+### Get tree at genus level
+
+```{R, eval=FALSE}
+tax_table = py$tax_new
+taxonomy <- tidyr::separate(data = tax_table, col = Taxonomy, into = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"), sep = "\\;") #separate the taxonomy table so each phylogenetic level is its own column
+taxmat <- taxonomy[,-1] #remove the OTU ID column from the taxonomy table
+rownames(taxmat) <- rownames(taxonomy) #and now give the taxonomy table the OTU IDs as row names
+TAX = tax_table(taxmat)
+rownames(TAX) = rownames(taxmat)
+phy_tree <- read_tree(paste(py$folder, 'qiime2/exports/tree.nwk', sep=''))
+ft = py$ft
+table_num = data.matrix(ft[,1:90]) #convert the ASV table to a numeric matric
+rownames(table_num) = rownames(ft)
+table = otu_table(table_num, taxa_are_rows = TRUE)
+physeq_all = phyloseq(table, phy_tree, TAX)
+
+physeq_genus = tax_glom(physeq_all, taxrank="ta5")
+genus_tree = phy_tree(physeq_genus)
+write.tree(genus_tree, paste(py$folder, 'processing/genus_tree.nwk', sep=''))
+```
+
+### Get tree at family level
+
+```{R, eval=FALSE}
+tax_table = py$tax_new
+taxonomy <- tidyr::separate(data = tax_table, col = Taxonomy, into = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"), sep = "\\;") #separate the taxonomy table so each phylogenetic level is its own column
+taxmat <- taxonomy[,-1] #remove the OTU ID column from the taxonomy table
+rownames(taxmat) <- rownames(taxonomy) #and now give the taxonomy table the OTU IDs as row names
+TAX = tax_table(taxmat)
+rownames(TAX) = rownames(taxmat)
+phy_tree <- read_tree(paste(py$folder, 'qiime2/exports/tree.nwk', sep=''))
+ft = py$ft
+table_num = data.matrix(ft[,1:90]) #convert the ASV table to a numeric matric
+rownames(table_num) = rownames(ft)
+table = otu_table(table_num, taxa_are_rows = TRUE)
+physeq_all = phyloseq(table, phy_tree, TAX)
+
+physeq_family = tax_glom(physeq_all, taxrank="ta4")
+family_tree = phy_tree(physeq_family)
+write.tree(family_tree, paste(py$folder, 'processing/family_tree.nwk', sep=''))
+```
+
+### Get tree at order level
+
+```{R, eval=FALSE}
+tax_table = py$tax_new
+taxonomy <- tidyr::separate(data = tax_table, col = Taxonomy, into = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"), sep = "\\;") #separate the taxonomy table so each phylogenetic level is its own column
+taxmat <- taxonomy[,-1] #remove the OTU ID column from the taxonomy table
+rownames(taxmat) <- rownames(taxonomy) #and now give the taxonomy table the OTU IDs as row names
+TAX = tax_table(taxmat)
+rownames(TAX) = rownames(taxmat)
+phy_tree <- read_tree(paste(py$folder, 'qiime2/exports/tree.nwk', sep=''))
+ft = py$ft
+table_num = data.matrix(ft[,1:90]) #convert the ASV table to a numeric matric
+rownames(table_num) = rownames(ft)
+table = otu_table(table_num, taxa_are_rows = TRUE)
+physeq_all = phyloseq(table, phy_tree, TAX)
+
+physeq_order = tax_glom(physeq_all, taxrank="ta3")
+order_tree = phy_tree(physeq_order)
+write.tree(order_tree, paste(py$folder, 'processing/order_tree.nwk', sep=''))
+```
+
+### Get tree at class level
+
+```{R, eval=FALSE}
+tax_table = py$tax_new
+taxonomy <- tidyr::separate(data = tax_table, col = Taxonomy, into = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"), sep = "\\;") #separate the taxonomy table so each phylogenetic level is its own column
+taxmat <- taxonomy[,-1] #remove the OTU ID column from the taxonomy table
+rownames(taxmat) <- rownames(taxonomy) #and now give the taxonomy table the OTU IDs as row names
+TAX = tax_table(taxmat)
+rownames(TAX) = rownames(taxmat)
+phy_tree <- read_tree(paste(py$folder, 'qiime2/exports/tree.nwk', sep=''))
+ft = py$ft
+table_num = data.matrix(ft[,1:90]) #convert the ASV table to a numeric matric
+rownames(table_num) = rownames(ft)
+table = otu_table(table_num, taxa_are_rows = TRUE)
+physeq_all = phyloseq(table, phy_tree, TAX)
+
+physeq_class = tax_glom(physeq_all, taxrank="ta2")
+class_tree = phy_tree(physeq_class)
+write.tree(class_tree, paste(py$folder, 'processing/class_tree.nwk', sep=''))
+```
+
+### Get tree at phylum level
+
+```{R, eval=FALSE}
+tax_table = py$tax_new
+taxonomy <- tidyr::separate(data = tax_table, col = Taxonomy, into = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"), sep = "\\;") #separate the taxonomy table so each phylogenetic level is its own column
+taxmat <- taxonomy[,-1] #remove the OTU ID column from the taxonomy table
+rownames(taxmat) <- rownames(taxonomy) #and now give the taxonomy table the OTU IDs as row names
+TAX = tax_table(taxmat)
+rownames(TAX) = rownames(taxmat)
+phy_tree <- read_tree(paste(py$folder, 'qiime2/exports/tree.nwk', sep=''))
+ft = py$ft
+table_num = data.matrix(ft[,1:90]) #convert the ASV table to a numeric matric
+rownames(table_num) = rownames(ft)
+table = otu_table(table_num, taxa_are_rows = TRUE)
+physeq_all = phyloseq(table, phy_tree, TAX)
+
+physeq_phylum = tax_glom(physeq_all, taxrank="ta1")
+phylum_tree = phy_tree(physeq_phylum)
+write.tree(phylum_tree, paste(py$folder, 'processing/phylum_tree.nwk', sep=''))
+```
+
+### Get the genus names for the ASV-named tree tips
+
+```{python, eval=FALSE}
+tree = Tree(folder+'processing/genus_tree.nwk', format=1)
+
+names = []
+internals = []
+
+genus_to_ASV = {}
+
+for node in tree.traverse("postorder"):
+    if node.name in genus_rename:
+      genus_to_ASV[genus_rename[node.name]] = node.name
+      
+with open(folder+'processing/genus_to_ASV.dict', 'wb') as f:
+  pickle.dump(genus_to_ASV, f)
+
+
+```
+
+### Get alpha diversity
+
+```{python, eval=FALSE}
+md = pd.read_csv(folder+'OM_metadata.csv', index_col=2, header=0)
+
+ft_rare_fn, genus_rare_fn = folder+'processing/ft_rare.csv', folder+'processing/genus_rare.csv'
+tree_fn, genus_tree_fn = folder+'qiime2/exports/tree.nwk', folder+'processing/genus_tree.nwk'
+
+diversity = ['chao1', 'shannon', 'simpson', 'simpson_e', 'faith_pd']
+dfs = [ft_rare_fn, genus_rare_fn]
+trees = [tree_fn, genus_tree_fn]
+name_level = ['ASV', 'Genus']
+
+for a in range(len(dfs)):
+  tree = read(trees[a], format="newick", into=TreeNode)
+  df = pd.read_csv(dfs[a], index_col=0, header=0)
+  all_alpha = []
+  for b in range(len(diversity)):
+    if diversity[b] == 'faith_pd':
+      this_df = df.copy(deep=True)
+      this_df = this_df.rename(index=genus_to_ASV)
+      this_df.index = this_df.index.map(str)
+      this_df = this_df.groupby(by=this_df.index, axis=0).sum()
+      X = this_df.transpose().iloc[0:].values
+      this_alpha = alpha_diversity("faith_pd", X, this_df.columns, tree=tree, otu_ids=this_df.index.values)
+    else:
+      X = df.transpose().iloc[0:].values
+      this_alpha = alpha_diversity(diversity[b], X, df.columns)
+    this_alpha = pd.DataFrame(this_alpha).rename(columns={0:diversity[b]})
+    all_alpha.append(this_alpha)
+  all_alpha = pd.concat(all_alpha).fillna(value=0)
+  all_alpha = all_alpha.groupby(by=all_alpha.index, axis=0).sum()
+  all_alpha.to_csv(folder+'diversity/alpha_diversity_rare_'+name_level[a]+'.csv')
+
+
+```
+
+### Get beta diversity distance matrix
+
+```{python, eval=FALSE}
+ft_rare_fn, genus_rare_fn = folder+'processing/ft_rare.csv', folder+'processing/genus_rare.csv'
+tree_fn, genus_fn = folder+'qiime2/exports/tree.nwk', folder+'processing/genus_tree.nwk'
+
+ft_level = [ft_rare_fn, ft_rare_fn, ft_rare_fn]
+genus_level = [genus_rare_fn, genus_rare_fn, genus_rare_fn]
+agglom_level = [agglom_relabun_ft, agglom_relabun_ft, agglom_rclr_ft]
+trees = [tree_fn, genus_tree_fn]
+diversity = ['weighted_unifrac']
+names = ['weighted_unifrac_rare']
+group_names = ['ASV', 'Genus']
+groups = [ft_level, genus_level]
+matrix_names = []
+similarity_matrix = []
+
+for g in range(len(groups)):
+  this_tree = read(trees[g], format="newick", into=TreeNode)
+  for d in range(len(diversity)):
+    if os.path.exists(folder+'diversity/beta_diversity_'+group_names[g]+'_'+names[d]+'.csv'):
+      similarities = pd.read_csv(folder+'diversity/beta_diversity_'+group_names[g]+'_'+names[d]+'.csv', index_col=0, header=0)
+      similarity_matrix.append(similarities)
+      matrix_names.append(group_names[g]+'_'+names[d])
+      continue
+    df = pd.read_csv(groups[g][d], index_col=0, header=0)
+    if 'weighted_unifrac' in diversity[d]:
+      this_df = pd.DataFrame(df)
+      this_df = this_df.rename(index=genus_to_ASV)
+      this_df.index = this_df.index.map(str)
+      this_df = this_df.groupby(by=this_df.index, axis=0).sum()
+      X = this_df.transpose().iloc[0:].values
+      similarities = beta_diversity(diversity[d], X, this_df.columns, tree=this_tree, otu_ids=this_df.index.values)
+      similarities = similarities.to_data_frame()
+    else:
+      X = df.transpose().iloc[0:].values
+      similarities = np.nan_to_num(distance.cdist(X, X, diversity[d]))
+    similarities = pd.DataFrame(similarities, columns=df.columns, index=df.columns)
+    similarity_matrix.append(similarities)
+    similarities.to_csv(folder+'diversity/beta_diversity_'+group_names[g]+'_'+names[d]+'.csv')
+    matrix_names.append(group_names[g]+'_'+names[d])
+
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+```
+
+### Permanova tests
+
+```{R, eval=FALSE}
+for (a in 1:2) {
+  mat_df = as.data.frame(py$similarity_matrix[a])
+  mat = data.matrix(mat_df)
+  colnames(mat) = rownames(mat)
+  md = py$md
+  permanova <- adonis(mat_df ~ md$Progression*md$patient_age*md$sex*md$ethnicity_details*md$TotalWeeklyAlcoholUnits*md$smoking_status*md$diagnosis*md$anatomical_site, data=mat_df, strata=md$Group)
+  table = permanova$aov.tab
+  write.csv(table, paste(py$folder, 'diversity/permanova_', py$matrix_names[a], '.csv', sep=''))
+}
+```
+
+Grouped:
+```{R, eval=FALSE}
+for (a in 1:2) {
+  mat_df = as.data.frame(py$similarity_matrix[a])
+  mat = data.matrix(mat_df)
+  colnames(mat) = rownames(mat)
+  md = py$md
+  permanova <- adonis(mat_df ~ md$Time_to_progression_grouped*md$patient_age*md$sex*md$ethnicity_details*md$TotalWeeklyAlcoholUnits*md$smoking_status*md$diagnosis*md$anatomical_site, data=mat_df, strata=md$Group)
+  table = permanova$aov.tab
+  write.csv(table, paste(py$folder, 'diversity/permanova_grouped_', py$matrix_names[a], '.csv', sep=''))
+}
+```
+
+Progressors only:
+```{python, eval=FALSE}
+keeping = []
+for row in md.index:
+  if md.loc[row, 'Progression'] == 'progression': keeping.append(row)
+
+for m in range(len(similarity_matrix)):
+  try:
+    similarity_matrix[m] = similarity_matrix[m].loc[keeping, [str(k) for k in keeping]]
+  except:
+    similarity_matrix[m] = similarity_matrix[m].loc[[str(k) for k in keeping], [str(k) for k in keeping]]
+
+md = md.loc[keeping, :]
+```
+
+```{R, eval=FALSE}
+for (a in 1:2) {
+  mat_df = as.data.frame(py$similarity_matrix[a])
+  mat = data.matrix(mat_df)
+  colnames(mat) = rownames(mat)
+  md = py$md
+  permanova <- adonis(mat_df ~ md$Total_Number_of_Months_Followed_or_to_Progression*md$patient_age*md$sex*md$ethnicity_details*md$TotalWeeklyAlcoholUnits*md$smoking_status*md$diagnosis*md$anatomical_site, data=mat_df)
+  table = permanova$aov.tab
+  write.csv(table, paste(py$folder, 'diversity/permanova_progressors_', py$matrix_names[a], '.csv', sep=''))
+}
+```
+
+```{R, eval=FALSE}
+for (a in 1:2) {
+  mat_df = as.data.frame(py$similarity_matrix[a])
+  mat = data.matrix(mat_df)
+  colnames(mat) = rownames(mat)
+  md = py$md
+  permanova <- adonis(mat_df ~ md$Time_to_progression_grouped*md$patient_age*md$sex*md$ethnicity_details*md$TotalWeeklyAlcoholUnits*md$smoking_status*md$diagnosis*md$anatomical_site, data=mat_df)
+  table = permanova$aov.tab
+  write.csv(table, paste(py$folder, 'diversity/permanova_progressors_grouped_', py$matrix_names[a], '.csv', sep=''))
+}
+```
+
+Plotting the results here:
+```{python, eval=FALSE}
+names = ['permanova_', 'permanova_grouped_', 'permanova_progressors_', 'permanova_progressors_grouped_']
+plot_name = ['Progression', 'Time to progression (grouped)', 'Progressors only', 'Progressors only (grouped)']
+name_rename = {}
+for n in range(len(names)): name_rename[names[n]] = plot_name[n]
+group_names = ['ASV', 'Genus']
+
+plt.figure(figsize=(10,15))
+ax1 = plt.subplot2grid((1,2),(0,0))
+ax2 = plt.subplot2grid((1,2),(0,1))
+axes = [ax1, ax2]
+
+for g in range(len(group_names)):
+  this_df, this_df_p = [], []
+  for d in range(len(names)):
+    df = pd.read_csv(folder+'diversity/'+names[d]+group_names[g]+'_weighted_unifrac_rare.csv', index_col=0, header=0)
+    df_r2 = pd.DataFrame(df.loc[:, 'R2']).rename(columns={'R2':plot_name[d]}).transpose()
+    df_p = pd.DataFrame(df.loc[:, 'Pr(>F)']).rename(columns={'Pr(>F)':plot_name[d]}).transpose()
+    this_df.append(df_r2)
+    this_df_p.append(df_p)
+  this_df = pd.concat(this_df).fillna(value=0).transpose().drop(['Total'], axis=0)
+  this_df = this_df.iloc[::-1]
+  this_df = this_df.drop('Residuals', axis=0)
+  this_df_p = pd.concat(this_df_p).fillna(value=0).transpose().drop(['Total'], axis=0)
+  this_df_p = this_df_p.iloc[::-1]
+  plt.sca(axes[g])
+  pc = plt.pcolor(this_df, vmin=0, vmax=0.052, edgecolor='k')
+  md_names = []
+  for row in this_df.index.values:
+    if '$' in row: md_names.append(row.replace('md$', ''))
+    else: md_names.append(row)
+  if g == 0: yt = plt.yticks([a+0.5 for a in range(len(this_df.index.values))], md_names)
+  else: yt = plt.yticks([a+0.5 for a in range(len(this_df.index.values))], [])
+  xt = plt.xticks([a+0.5 for a in range(len(this_df.columns))], this_df.columns, rotation=90)
+  tt = axes[g].xaxis.tick_top()
+  ti = plt.title(group_names[g], fontweight='bold')
+  for a in range(len(this_df.index.values)):
+    for b in range(len(this_df.columns)):
+      num = this_df.iloc[a, b]
+      if num == 0: continue
+      if num < 0.026: color='w'
+      else: color = 'k'
+      num = round(num, 3)
+      sig = ''
+      if this_df_p.loc[this_df.index.values[a], this_df.columns[b]] <= 0.05: sig = ' *'
+      tx = plt.text(b+0.5, a+0.5, str(num)+sig, ha='center', va='center', fontsize=8, color=color)
+
+plt.savefig(folder+'figures/Adonis_R2_results.png', dpi=600, bbox_inches='tight')
+
+
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/Adonis_R2_results.png)
+
+### PCoA plots
+
+Ellipses around progression:
+```{python, eval=FALSE}
+plt.figure(figsize=(10,10))
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+
+groups = ['All', '<1', '1<2', '2<3', '3<4', '4<6', '>6']
+axes = [plt.subplot2grid((4,3),(0,0),rowspan=2, colspan=3), plt.subplot2grid((4,3),(2,0)), plt.subplot2grid((4,3),(2,1)), plt.subplot2grid((4,3),(2,2)), plt.subplot2grid((4,3),(3,0)), plt.subplot2grid((4,3),(3,1)), plt.subplot2grid((4,3),(3,2))]
+
+distances = pd.read_csv(folder+'diversity/beta_diversity_ASV_weighted_unifrac_rare.csv', index_col=0, header=0)
+distances.index = distances.index.map(str)
+distances.columns = distances.columns.map(str)
+md.index = md.index.map(str)
+
+with open(folder+'processing/matches.dict', 'rb') as f:
+    matches_dict = pickle.load(f)
+
+for g in range(len(groups)):
+  group_vals = {}
+  if groups[g] != 'All':
+    keeping = []
+    for sample in distances.index:
+      group = md.loc[sample, 'Time_to_progression_grouped']
+      if group != groups[g]: continue
+      keeping.append(sample)
+      for m in matches_dict[sample]:
+        keeping.append(m)
+    this_df = distances.copy(deep=True).loc[keeping, keeping]
+  else:
+    this_df = distances.copy(deep=True)
+  pcoa_results = ordination.pcoa(this_df)
+  PC1, PC2 = pcoa_results.samples.loc[:, 'PC1'].values, pcoa_results.samples.loc[:, 'PC2'].values
+  prop_explain1, prop_explain2 = pcoa_results.proportion_explained[0], pcoa_results.proportion_explained[1]
+  values_x, values_y = {}, {}
+  vals_names_x, vals_names_y = {}, {}
+  for b in range(len(PC1)):
+    name = md.loc[this_df.index.values[b], 'Progression']
+    vals_names_x[this_df.index.values[b]] = PC1[b]
+    vals_names_y[this_df.index.values[b]] = PC2[b]
+    color = colors[name]
+    if name in values_x: values_x[name] = values_x[name]+[PC1[b]]
+    else: values_x[name] = [PC1[b]]
+    if name in values_y: values_y[name] = values_y[name]+[PC2[b]]
+    else: values_y[name] = [PC2[b]]
+    sc = axes[g].scatter(PC1[b], PC2[b], color=color, edgecolor='k', s=50)
+    tx = axes[g].text(PC1[b], PC2[b], md.loc[this_df.index.values[b], 'Group'], ha='center', va='center', fontsize=4, color='w')
+  # for sample in this_df.index.values:
+  #   if md.loc[sample, 'Progression'] == 'progression':
+  #     for m in matches_dict[sample]:
+  #       pl = axes[g].plot([vals_names_x[sample], vals_names_x[m]], [vals_names_y[sample], vals_names_y[m]], 'k-', alpha=0.5)
+  for name in values_x:
+    ce = confidence_ellipse(np.asarray(values_x[name]), np.asarray(values_y[name]), ax=axes[g], edgecolor=colors[name])
+  xl = axes[g].set_xlabel('PCoA1 ('+format(prop_explain1*100, '.2f')+'%)')
+  yl = axes[g].set_ylabel('PCoA2 ('+format(prop_explain2*100, '.2f')+'%)')
+  title = groups[g]
+  if title[1] == '<': title = title.replace('<', '-')
+  ti = axes[g].set_title(title, fontweight='bold')
+  if g == 0:
+    handles = [Line2D([0], [0], marker='s', color='w', label=name.capitalize(), markerfacecolor=colors[name], markersize=12) for name in colors]
+    lg = axes[g].legend(handles=handles, loc='upper right', fontsize=8)
+
+plt.tight_layout()
+plt.savefig(folder+'figures/PCoA.png', dpi=600, bbox_inches='tight')
+
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/PCoA.png)
+
+Group distances on bottoms:
+```{python, eval=FALSE}
+plt.figure(figsize=(10,10))
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+
+groups = ['All']
+axes = [plt.subplot2grid((5,5),(0,0), rowspan=4, colspan=4)]
+axes.append(plt.subplot2grid((5,5),(0,4), rowspan=4, sharey=axes[0]))
+axes.append(plt.subplot2grid((5,5),(4,0), colspan=4, sharex=axes[0]))
+
+distances = pd.read_csv(folder+'diversity/beta_diversity_ASV_weighted_unifrac_rare.csv', index_col=0, header=0)
+distances.index = distances.index.map(str)
+distances.columns = distances.columns.map(str)
+md.index = md.index.map(str)
+
+x = {'progression':0, 'no progression':1}
+
+with open(folder+'processing/matches.dict', 'rb') as f:
+    matches_dict = pickle.load(f)
+
+for g in range(len(groups)):
+  group_vals = {}
+  if groups[g] != 'All':
+    keeping = []
+    for sample in distances.index:
+      group = md.loc[sample, 'Time_to_progression_grouped']
+      if group != groups[g]: continue
+      keeping.append(sample)
+      for m in matches_dict[sample]:
+        keeping.append(m)
+    this_df = distances.copy(deep=True).loc[keeping, keeping]
+  else:
+    this_df = distances.copy(deep=True)
+  pcoa_results = ordination.pcoa(this_df)
+  PC1, PC2 = pcoa_results.samples.loc[:, 'PC1'].values, pcoa_results.samples.loc[:, 'PC2'].values
+  prop_explain1, prop_explain2 = pcoa_results.proportion_explained[0], pcoa_results.proportion_explained[1]
+  values_x, values_y = {}, {}
+  vals_names_x, vals_names_y = {}, {}
+  for b in range(len(PC1)):
+    name = md.loc[this_df.index.values[b], 'Progression']
+    vals_names_x[this_df.index.values[b]] = PC1[b]
+    vals_names_y[this_df.index.values[b]] = PC2[b]
+    color = colors[name]
+    if name in values_x: values_x[name] = values_x[name]+[PC1[b]]
+    else: values_x[name] = [PC1[b]]
+    if name in values_y: values_y[name] = values_y[name]+[PC2[b]]
+    else: values_y[name] = [PC2[b]]
+    sc = axes[g].scatter(PC1[b], PC2[b], color=color, edgecolor='k', s=50)
+    tx = axes[g].text(PC1[b], PC2[b], md.loc[this_df.index.values[b], 'Group'], ha='center', va='center', fontsize=4, color='w')
+  # for sample in this_df.index.values:
+  #   if md.loc[sample, 'Progression'] == 'progression':
+  #     for m in matches_dict[sample]:
+  #       pl = axes[g].plot([vals_names_x[sample], vals_names_x[m]], [vals_names_y[sample], vals_names_y[m]], 'k-', alpha=0.5)
+  for name in values_x:
+    ce = confidence_ellipse(np.asarray(values_x[name]), np.asarray(values_y[name]), ax=axes[g], edgecolor=colors[name])
+    box = axes[2].boxplot(values_x[name], positions=[x[name]], widths=0.8, vert=False)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: plt.setp(box[item], color='k')
+    scat = axes[2].scatter(values_x[name], np.random.normal(x[name], 0.1, len(values_x[name])), color=colors[name], alpha=0.5)
+    box = axes[1].boxplot(values_y[name], positions=[x[name]], widths=0.8)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: plt.setp(box[item], color='k')
+    scat = axes[1].scatter(np.random.normal(x[name], 0.1, len(values_y[name])), values_y[name], color=colors[name], alpha=0.5)
+  xl = axes[2].set_xlabel('PCoA1 ('+format(prop_explain1*100, '.2f')+'%)')
+  yl = axes[g].set_ylabel('PCoA2 ('+format(prop_explain2*100, '.2f')+'%)')
+  title = groups[g]
+  if title[1] == '<': title = title.replace('<', '-')
+  ti = axes[g].set_title(title, fontweight='bold')
+  if g == 0:
+    handles = [Line2D([0], [0], marker='s', color='w', label=name.capitalize().replace('ssion', 'ssor'), markerfacecolor=colors[name], markersize=12) for name in colors]
+    lg = axes[g].legend(handles=handles, loc='upper right', fontsize=8)
+  plt.sca(axes[g])
+  plt.xticks([])
+  plt.sca(axes[1])
+  plt.yticks([]), plt.xticks([0, 1], ['Progressor', 'Non-progressor'], rotation=90)
+  plt.sca(axes[2])
+  plt.yticks([0, 1], ['Progressor', 'Non-progressor'])
+  
+
+plt.tight_layout()
+plt.savefig(folder+'figures/PCoA_distance_groups.png', dpi=600, bbox_inches='tight')
+
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/PCoA_distance_groups.png)
+
+### Differential abundance testing
+
+#### ASV
+
+```{python, eval=FALSE}
+ft = pd.read_csv(folder+'qiime2/exports/feature-table_w_tax.txt', index_col=0, header=0, sep='\t').drop('taxonomy', axis=1)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+ft_rare = pd.read_csv(ft_rare_fn, index_col=0, header=0)
+
+rename_sample = {}
+for sample in ft.columns:
+  rename_sample[sample] = 'Sample_'+str(sample)
+
+ft = ft.rename(columns=rename_sample)
+ft_rare = ft_rare.rename(columns=rename_sample)
+md.index = md.index.map(str)
+md = md.rename(index=rename_sample)
+
+```
+
+ANCOM progression:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Progression', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Progression')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_asv.csv", sep=''))
+```
+
+ANCOM progression grouped:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Time_to_progression_grouped', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Time_to_progression_grouped')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_asv_grouped.csv", sep=''))
+```
+
+Aldex:
+```{R, eval=FALSE}
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+md = md[c('Samples', 'Progression')]
+
+results_all <- aldex(reads=ft, conditions = md[,2], mc.samples = 128, test="kw", effect=TRUE, include.sample.summary = FALSE, verbose=T, denom="all")
+write.csv(results_all, paste(py$folder, "differential_abundance/aldex_asv.csv", sep=''))
+```
+
+Aldex:
+```{R, eval=FALSE}
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+md = md[c('Samples', 'Time_to_progression_grouped')]
+
+results_all <- aldex(reads=ft, conditions = md[,2], mc.samples = 128, test="kw", effect=TRUE, include.sample.summary = FALSE, verbose=T, denom="all")
+write.csv(results_all, paste(py$folder, "differential_abundance/aldex_asv_grouped.csv", sep=''))
+```
+
+Maaslin2 (rarefied):
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_asv_full_model", sep=''), transform = "AST", fixed_effects = c("Progression"), random_effects=c("Group"), standardize = FALSE, plot_heatmap = F, plot_scatter = F, reference="Progression,NP")
+```
+
+Maaslin2 (rarefied) grouped:
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_asv_grouped_full_model", sep=''), transform = "AST", fixed_effects = c("Time_to_progression_grouped"), random_effects=c("Group"), standardize = FALSE, plot_heatmap = F, plot_scatter = F, reference="Time_to_progression_grouped,NP")
+```
+
+#### ASV progressors only
+
+```{python, eval=FALSE}
+ft = pd.read_csv(folder+'qiime2/exports/feature-table_w_tax.txt', index_col=0, header=0, sep='\t').drop('taxonomy', axis=1)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+ft_rare = pd.read_csv(ft_rare_fn, index_col=0, header=0)
+
+rename_sample = {}
+for sample in ft.columns:
+  rename_sample[sample] = 'Sample_'+str(sample)
+  
+keeping = []
+
+ft = ft.rename(columns=rename_sample)
+ft_rare = ft_rare.rename(columns=rename_sample)
+md.index = md.index.map(str)
+md = md.rename(index=rename_sample)
+
+for sample in md.index:
+  if md.loc[sample, 'Progression'] == 'progression':
+    keeping.append(sample)
+
+ft = ft.loc[:, keeping]
+ft_rare = ft_rare.loc[:, keeping]
+md = md.loc[keeping, :]
+
+```
+
+ANCOM progression specific:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Total_Number_of_Months_Followed_or_to_Progression', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Total_Number_of_Months_Followed_or_to_Progression')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_asv_progressors_specific.csv", sep=''))
+```
+
+ANCOM progression grouped:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Time_to_progression_grouped', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Time_to_progression_grouped')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_asv_progressors_grouped.csv", sep=''))
+```
+
+Aldex:
+```{R, eval=FALSE}
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+md = md[c('Samples', 'Time_to_progression_grouped')]
+
+results_all <- aldex(reads=ft, conditions = md[,2], mc.samples = 128, test="kw", effect=TRUE, include.sample.summary = FALSE, verbose=T, denom="all")
+write.csv(results_all, paste(py$folder, "differential_abundance/aldex_asv_progressors_grouped.csv", sep=''))
+```
+
+Maaslin2 (rarefied):
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_asv_progressors_specific_full_model", sep=''), transform = "AST", fixed_effects = c("Total_Number_of_Months_Followed_or_to_Progression"), standardize = FALSE, plot_heatmap = F, plot_scatter = F)
+```
+
+Maaslin2 (rarefied) grouped:
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_asv_progressors_grouped_full_model", sep=''), transform = "AST", fixed_effects = c("Time_to_progression_grouped"), standardize = FALSE, plot_heatmap = F, plot_scatter = F)
+```
+
+#### Genus
+
+```{python, eval=FALSE}
+ft = pd.read_csv(folder+'processing/genus.csv', index_col=0, header=0)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+ft_rare = pd.read_csv(genus_rare_fn, index_col=0, header=0)
+
+rename_sample = {}
+for sample in ft.columns:
+  rename_sample[sample] = 'Sample_'+str(sample)
+
+ft = ft.rename(columns=rename_sample)
+ft_rare = ft_rare.rename(columns=rename_sample)
+md.index = md.index.map(str)
+md = md.rename(index=rename_sample)
+
+```
+
+ANCOM progression:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Progression', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Progression')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_genus.csv", sep=''))
+```
+
+ANCOM progression grouped:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Time_to_progression_grouped', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Time_to_progression_grouped')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_genus_grouped.csv", sep=''))
+```
+
+Aldex:
+```{R, eval=FALSE}
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+md = md[c('Samples', 'Progression')]
+
+results_all <- aldex(reads=ft, conditions = md[,2], mc.samples = 128, test="kw", effect=TRUE, include.sample.summary = FALSE, verbose=T, denom="all")
+write.csv(results_all, paste(py$folder, "differential_abundance/aldex_genus.csv", sep=''))
+```
+
+Aldex:
+```{R, eval=FALSE}
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+md = md[c('Samples', 'Time_to_progression_grouped')]
+
+results_all <- aldex(reads=ft, conditions = md[,2], mc.samples = 128, test="kw", effect=TRUE, include.sample.summary = FALSE, verbose=T, denom="all")
+write.csv(results_all, paste(py$folder, "differential_abundance/aldex_genus_grouped.csv", sep=''))
+```
+
+Maaslin2 (rarefied):
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_genus_full_model", sep=''), transform = "AST", fixed_effects = c("Progression"), random_effects=c("Group"), standardize = FALSE, plot_heatmap = F, plot_scatter = F, reference="Progression,NP")
+```
+
+Maaslin2 (rarefied) grouped:
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_genus_grouped_full_model", sep=''), transform = "AST", fixed_effects = c("Time_to_progression_grouped"), random_effects=c("Group"), standardize = FALSE, plot_heatmap = F, plot_scatter = F, reference="Time_to_progression_grouped,NP")
+```
+
+#### Genus progressors only
+
+```{python, eval=FALSE}
+ft = pd.read_csv(folder+'processing/genus.csv', index_col=0, header=0)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+ft_rare = pd.read_csv(genus_rare_fn, index_col=0, header=0)
+
+rename_sample = {}
+for sample in ft.columns:
+  rename_sample[sample] = 'Sample_'+str(sample)
+  
+keeping = []
+
+ft = ft.rename(columns=rename_sample)
+ft_rare = ft_rare.rename(columns=rename_sample)
+md.index = md.index.map(str)
+md = md.rename(index=rename_sample)
+
+for sample in md.index:
+  if md.loc[sample, 'Progression'] == 'progression':
+    keeping.append(sample)
+
+ft = ft.loc[:, keeping]
+ft_rare = ft_rare.loc[:, keeping]
+md = md.loc[keeping, :]
+
+```
+
+ANCOM progression specific:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Total_Number_of_Months_Followed_or_to_Progression', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Total_Number_of_Months_Followed_or_to_Progression')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_genus_progressors_specific.csv", sep=''))
+```
+
+ANCOM progression grouped:
+```{R, eval=FALSE}
+source(paste("/Users/robynwright/Dropbox/Langille_Lab_postdoc/Github/", "ancom_v2.1.R", sep=""))
+
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+
+process = feature_table_pre_process(ft, md, 'Samples', 'Time_to_progression_grouped', lib_cut=10, neg_lb=TRUE)
+ancom_out_all = ANCOM(process$feature_table, process$meta_data, main_var='Time_to_progression_grouped')
+ancom_out_all = ancom_out_all$out
+
+write.csv(ancom_out_all, paste(py$folder, "differential_abundance/ancom_genus_progressors_grouped.csv", sep=''))
+```
+
+Aldex:
+```{R, eval=FALSE}
+ft = py$ft
+md = py$md
+md['Samples'] = row.names(md)
+md = md[c('Samples', 'Time_to_progression_grouped')]
+
+results_all <- aldex(reads=ft, conditions = md[,2], mc.samples = 128, test="kw", effect=TRUE, include.sample.summary = FALSE, verbose=T, denom="all")
+write.csv(results_all, paste(py$folder, "differential_abundance/aldex_genus_progressors_grouped.csv", sep=''))
+```
+
+Maaslin2 (rarefied):
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_genus_progressors_specific_full_model", sep=''), transform = "AST", fixed_effects = c("Total_Number_of_Months_Followed_or_to_Progression"), standardize = FALSE, plot_heatmap = F, plot_scatter = F)
+```
+
+Maaslin2 (rarefied) grouped:
+```{R, eval=FALSE}
+ft = py$ft_rare
+md = py$md
+md['Samples'] = row.names(md)
+#md = md[c('Samples', 'Progression')]
+
+feat_table = data.frame(t(ft), check.rows = F, check.names = F, stringsAsFactors = F)
+results_all <- Maaslin2(feat_table, md, paste(py$folder, "differential_abundance/maaslin_genus_progressors_grouped_full_model", sep=''), transform = "AST", fixed_effects = c("Time_to_progression_grouped"), standardize = FALSE, plot_heatmap = F, plot_scatter = F)
+```
+
+## Cox proportional hazards test
+
+```{python, eval=FALSE}
+ft = pd.read_csv(folder+'qiime2/exports/feature-table_w_tax.txt', index_col=0, header=0, sep='\t').drop('taxonomy', axis=1)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+ft_rare = pd.read_csv(ft_rare_fn, index_col=0, header=0)
+
+rename_sample = {}
+for sample in ft.columns:
+  rename_sample[sample] = 'Sample_'+str(sample)
+
+ft = ft.rename(columns=rename_sample)
+ft_rare = ft_rare.rename(columns=rename_sample)
+md.index = md.index.map(str)
+md = md.rename(index=rename_sample)
+
+for row in md.index:
+  if md.loc[row, 'Progression'] == 'progression': md.loc[row, 'Progression'] = 1
+  elif md.loc[row, 'Progression'] == 'no progression': md.loc[row, 'Progression'] = 0
+
+prog_list, time_list, alc_list, age_list, smk_list, diag_list = list(md.loc[:, 'Progression'].values), list(md.loc[:, 'Total_Number_of_Months_Followed_or_to_Progression'].values), list(md.loc[:, 'TotalWeeklyAlcoholUnits'].values), list(md.loc[:, 'patient_age'].values), list(md.loc[:, 'SMK_Pack_Year_total'].values), list(md.loc[:, 'diagnosis'].values)
+
+time_list = [int(round(t, 0)) for t in time_list]
+alc_list = [int(a) for a in alc_list]
+age_list = [int(round(a, 0)) for a in age_list]
+smk_list = [int(round(s, 0)) for s in smk_list]
+
+```
+
+```{R, eval=FALSE}
+tests = list(time=py$time_list, 
+             prog=py$prog_list,
+             alc=py$alc_list,
+             age=py$age_list,
+             smk=py$smk_list,
+             diag=py$diag_list)
+
+require("survival")
+cox_results = coxph(Surv(time, prog) ~ alc  + age + smk + diag, data = tests)
+cox_coef = cox_results$coefficients
+cox_results
+
+#can't work out how to save the p values from the coxph object, so just copying them here to use in python chunk
+#coefficient, p
+cox_alc = c(0.001047, 0.955)
+cox_age = c(-0.006411, 0.729)
+cox_smk = c(0.013195, 0.304)
+
+```
+
+## Figures for paper
+
+### Figure 1
+
+```{python, eval=FALSE}
+plt.figure(figsize=(15,15))
+plot_md = ['patient_age', 'TotalWeeklyAlcoholUnits', 'SMK_Pack_Year_total', 'Total_Number_of_Months_Followed', 'Total_Number_of_Months_Followed_or_to_Progression']
+plot_names_md = ['Age (years)', 'Alcohol intake (drinks/week)', 'Smoking history (packs/year)', 'Total follow-up time (months)', 'Follow-up to progression (months)']
+diversity = ['chao1', 'shannon', 'simpson', 'simpson_e', 'faith_pd']
+div_names = ['Chao1 richness', 'Shannon diversity', "Simpson's diversity", "Simpson's evenness", "Faith's Phylogenetic diversity"]
+
+cox_results = [r.cox_alc, r.cox_age, r.cox_smk]
+
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+md.index = md.index.map(str)
+div = pd.read_csv(folder+'diversity/alpha_diversity_rare_ASV.csv', index_col=0, header=0)
+div.index = div.index.map(str)
+ft_rare = pd.read_csv(ft_rare_fn, index_col=0, header=0)
+
+with open(folder+'processing/matches.dict', 'rb') as f:
+    matches_dict = pickle.load(f)
+
+letters = ['A', 'B']
+
+for z in range(2):
+  if z == 0: 
+    to_plot = plot_md
+    plot_names = plot_names_md
+  else:
+    to_plot = diversity
+    plot_names = div_names
+  for a in range(len(to_plot)):
+    ax = plt.subplot2grid((4, 5), (z,a))
+    if a == 0:
+      ax.text(-0.4, 1.05, letters[z], fontweight='bold', fontsize=20, transform=ax.transAxes)
+      if z == 1:
+        ax.text(-0.4, -0.35, 'C', fontweight='bold', fontsize=20, transform=ax.transAxes)
+    prog, nonp = [], []
+    if z == 0:
+      for sample in md.index:
+        val = md.loc[sample, to_plot[a]]
+        if md.loc[sample, 'Progression'] == 'progression': 
+          prog.append(val)
+          x = np.random.normal(1, 0.12, 1)[0]
+          for m in matches_dict[sample]:
+           match = md.loc[m, to_plot[a]]
+           nonp.append(match)
+           xnp = np.random.normal(2, 0.12, 1)[0]
+           line = plt.plot([x, xnp], [val, match], 'k-', alpha=0.05)
+           scat = plt.scatter(xnp, match, color=colors['no progression'], alpha=0.5)
+          scat = plt.scatter(x, val, color=colors['progression'], alpha=0.5)
+    else:
+      for sample in div.index:
+        if md.loc[sample, 'Progression'] == 'progression': 
+          val = div.loc[sample, to_plot[a]]
+          prog.append(val)
+          x = np.random.normal(1, 0.12, 1)[0]
+          for m in matches_dict[sample]:
+           match = div.loc[m, to_plot[a]]
+           nonp.append(match)
+           xnp = np.random.normal(2, 0.12, 1)[0]
+           line = plt.plot([x, xnp], [val, match], 'k-', alpha=0.05)
+           scat = plt.scatter(xnp, match, color=colors['no progression'], alpha=0.5)
+          scat = plt.scatter(x, val, color=colors['progression'], alpha=0.5)
+    box = ax.boxplot([prog, nonp], positions=[1,2], widths=0.8, showfliers=False)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: plt.setp(box[item], color='k')
+    #scat = plt.scatter(np.random.normal(1, 0.15, len(prog)), prog, color=colors['progression'], alpha=0.5)
+    #scat = plt.scatter(np.random.normal(2, 0.15, len(nonp)), nonp, color=colors['no progression'], alpha=0.5)
+    yl = plt.ylabel(plot_names[a], fontweight='bold')
+    xt = plt.xticks([1, 2], ['P', 'NP'])
+    xl = plt.xlabel('Sample group', fontweight='bold')
+    high, low = float(ax.get_ylim()[1]), float(ax.get_ylim()[0])
+    span = high-low
+    diff = span*0.01
+    high = high+diff*8
+    stat, p = mannwhitneyu(prog, nonp)
+    li = ax.plot([1, 1, 2, 2], [high-diff, high, high, high-diff], color='k')
+    string = '\nU='+str(round(stat, 2))+', $p$='+str(round(p, 3))
+    if z == 0 and a < 3:
+      string += '\nCoef='+str(round(cox_results[a][0], 3))+', $p$='+str(round(cox_results[a][1], 3))
+    tx = ax.text(1.5, high+(diff*0.5), string, va='bottom', ha='center')
+    if z == 0 and a < 3: high = high+span*0.1
+    yl = ax.set_ylim([low,high+span*0.1])
+  
+  
+ax_beta = plt.subplot2grid((4, 5), (2,0), colspan=3, rowspan=2)
+matrix = pd.read_csv(folder+'diversity/beta_diversity_ASV_weighted_unifrac_rare.csv', index_col=0, header=0)
+matrix.index = matrix.index.map(str)
+pcoa_results = ordination.pcoa(matrix)
+PC1, PC2 = pcoa_results.samples.loc[:, 'PC1'].values, pcoa_results.samples.loc[:, 'PC2'].values
+prop_explain1, prop_explain2 = pcoa_results.proportion_explained[0], pcoa_results.proportion_explained[1]
+values_x, values_y = {}, {}
+for b in range(len(PC1)):
+  name = md.loc[matrix.index.values[b], 'Progression']
+  color = colors[name]
+  if name in values_x: values_x[name] = values_x[name]+[PC1[b]]
+  else: values_x[name] = [PC1[b]]
+  if name in values_y: values_y[name] = values_y[name]+[PC2[b]]
+  else: values_y[name] = [PC2[b]]
+  sc = ax_beta.scatter(PC1[b], PC2[b], color=color, s=100, alpha=0.8)
+for name in values_x:
+  confidence_ellipse(np.asarray(values_x[name]), np.asarray(values_y[name]), ax=ax_beta, edgecolor=colors[name])
+ax_beta.set_xlabel('PCoA1 ('+format(prop_explain1*100, '.2f')+'%)', fontweight='bold'), ax_beta.set_ylabel('PCoA2 ('+format(prop_explain2*100, '.2f')+'%)', fontweight='bold')
+ax_beta.set_title('Weighted UniFrac distance', fontweight='bold')
+handles = [Line2D([0], [0], marker='s', color='w', label=name.capitalize().replace('ssion', 'ssor').replace('No ', 'Non-'), markerfacecolor=colors[name], markersize=12) for name in colors]
+ax_beta.legend(handles=handles, loc='upper right')
+
+files = ['permanova_ASV_weighted_unifrac_rare.csv', 'permanova_grouped_ASV_weighted_unifrac_rare.csv', 'permanova_progressors_ASV_weighted_unifrac_rare.csv']
+names = ['Progression', 'Progression (grouped)', 'Progressors only']
+
+rename = {'Progression':'Progression', 'Time_to_progression_grouped':'Progression (grouped)', 'Total_Number_of_Months_Followed_or_to_Progression':'Months to progression', 'patient_age':'Age', 'sex':'Sex', 'ethnicity_details':'Ethnicity', 'TotalWeeklyAlcoholUnits':'Alcohol intake', 'smoking_status':'Smoking status', 'diagnosis':'Grade of dysplasia', 'anatomical_site':'Lesion site'}
+main_rows = [rename[r] for r in rename]
+
+df_R2, df_p = [], []
+for f in range(len(files)):
+  this_file = pd.read_csv(folder+'diversity/'+files[f], index_col=0, header=0).loc[:, ['R2', 'Pr(>F)']].drop(['Residuals', 'Total'], axis=0)
+  rename_file = {}
+  for row in this_file.index:
+    name = row.replace('md$', '')
+    name = name.split(':')
+    name = [rename[n] for n in name]
+    name = ' : '.join(name)
+    rename_file[row] = name
+  this_file = this_file.rename(index=rename_file)
+  df_R2.append(this_file.loc[:, ['R2']].rename(columns={'R2':names[f]}))
+  df_p.append(this_file.loc[:, ['Pr(>F)']].rename(columns={'Pr(>F)':names[f]}))
+
+df_R2 = pd.concat(df_R2).fillna(value=0)
+df_R2 = df_R2.groupby(by=df_R2.index, axis=0).sum()  
+df_p = pd.concat(df_p).fillna(value=0)
+df_p = df_p.groupby(by=df_p.index, axis=0).sum()  
+df_p[df_p == 0] = 1
+keeping = main_rows
+for row in df_R2.index:
+  if row in main_rows: continue
+  else:
+    if min(df_p.loc[row, :].values) <= 0.05: keeping.append(row)
+    elif max(df_R2.loc[row, :].values) >= 0.05: keeping.append(row)
+    
+print(df_R2, df_p)
+
+df_R2 = df_R2.loc[keeping, :]
+df_p = df_p.loc[keeping, :]
+
+ax_r2 = plt.subplot2grid((4, 30), (2,26), colspan=4, rowspan=2)
+plt.sca(ax_r2)
+df_R2 = df_R2.iloc[::-1]
+plt.pcolor(df_R2, edgecolor='k', vmax=0.05)
+plt.yticks([a+0.5 for a in range(len(df_R2.index))], [a for a in df_R2.index], fontsize=8)
+plt.xticks([0.5, 1.5, 2.5], [n.replace(' ', '\n') for n in names], rotation=90)
+plt.title('PERMANOVA R$^{2}$', fontweight='bold')
+
+for a in range(len(df_R2.index)):
+  for b in range(len(df_R2.columns)):
+    val = df_R2.loc[df_R2.index[a], df_R2.columns[b]]
+    if val == 0: continue
+    if val < 0.03: color = 'w'
+    else: color = 'k'
+    val = str(round(val, 3))
+    if df_p.loc[df_R2.index[a], df_R2.columns[b]] <= 0.05:
+      plt.text(b+0.5, a+0.5, val+'*', color=color, ha='center', va='center')
+    else:
+      plt.text(b+0.5, a+0.5, val, color=color, ha='center', va='center')
+
+plt.subplots_adjust(wspace=0.5, hspace=0.4)
+plt.savefig(folder+'figures/Figure1.png', dpi=600, bbox_inches='tight')
+
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/Figure1.png)
+
+### Fig. S1
+
+```{python, eval=FALSE}
+plt.figure(figsize=(45,15))
+tree_names = ['phylum', 'class', 'order', 'family', 'genus']
+letters = ['A', 'B', 'C', 'D', 'E']
+with open(folder+'processing/tax.dict', 'rb') as f:
+  tax_dict = pickle.load(f)
+with open(folder+'processing/genus.dict', 'rb') as f:
+  genus_dict = pickle.load(f)
+ft = pd.read_csv(ft_relabun_fn, index_col=0, header=0)
+md = pd.read_csv(folder+'OM_metadata.csv', index_col=2, header=0)
+
+count = 0
+width = [1, 2, 2, 2, 3]
+for a in range(5):
+  #if a > 0: continue
+  ax_tree = plt.subplot2grid((30,31),(1,count), colspan=2, rowspan=29, frameon=False)
+  plt.title('   '+letters[a]+'\n\n', loc='left', fontweight='bold', fontsize=16)
+  count += 2
+  ax_labels = plt.subplot2grid((30,31),(1,count), colspan=width[a], rowspan=29, frameon=False)
+  count += width[a]
+  plt.xticks([]), plt.yticks([])
+  plt.title(tree_names[a].capitalize()+'\n\n', fontweight='bold', fontsize=16)
+  ax_heat_prev = plt.subplot2grid((30,31),(1,count), colspan=1, rowspan=29)
+  plt.xticks([]), plt.yticks([])
+  ax_heat_abun = plt.subplot2grid((30,31),(1,count+1), colspan=1, rowspan=29)
+  plt.xticks([]), plt.yticks([])
+  ax_prog_prev = plt.subplot2grid((30,31),(0,count), colspan=1)
+  plt.xticks([]), plt.yticks([]), plt.title('Prevalence', rotation=45, fontweight='bold')
+  ax_prog_abun = plt.subplot2grid((30,31),(0,count+1), colspan=1)
+  plt.xticks([]), plt.yticks([]), plt.title('Relative\nabundance (%)', rotation=45, fontweight='bold')
+  prog_axes = [ax_prog_prev, ax_prog_abun]
+  for ax in prog_axes:
+    ax.bar([0,1], [1,1], color=[colors['progression'], colors['no progression']], width=1, edgecolor='k')
+    ax.text(0, 0.5, 'P', ha='center', va='center', color='w'), ax.text(1, 0.5, 'NP', ha='center', va='center', color='w')
+    ax.set_xlim([-0.5, 1.5]), ax.set_ylim([0, 1])
+  count += 2
+  ft_level = ft.copy(deep=True)
+  rename_level, rename_level_opposite = {}, {}
+  tree_name = folder+'processing/'+tree_names[a]+'_tree.nwk'
+  for row in ft_level.index:
+    rename_level[row] = tax_dict[row].split('; ')[a+1]
+    if a < 4: rename_level_opposite[tax_dict[row].split('; ')[a+1]] = row
+    else: rename_level_opposite[genus_dict[row]] = row
+  if a == 4: rename_level = genus_dict
+  ft_level = ft_level.rename(index=rename_level)
+  ft_level = ft_level.groupby(by=ft_level.index, axis=0).sum()
+  if ft_level.shape[0] > 30:
+    ft_group = ft_level.copy(deep=True).transpose()
+    rename_samples = {}
+    for sample in ft_group.index:
+      rename_samples[sample] = md.loc[int(sample), 'Progression']
+    ft_group = ft_group.rename(index=rename_samples)
+    ft_group = ft_group.groupby(by=ft_group.index, axis=0).mean().transpose()
+    ft_group['Mean'] = ft_group.mean(axis=1)
+    ft_group = ft_group.sort_values(by=['Mean'], ascending=False)
+    ft_group = ft_group.iloc[:30, :]
+    ft_level = ft_level.loc[ft_group.index, :]
+    tree = Tree(tree_name, format=1)
+    rename_tree_level = {}
+    keeping = []
+    for node in tree.traverse("postorder"):
+      if node.name in rename_level:
+        rename_tree_level[rename_level[node.name]] = node.name
+        if rename_level[node.name] in ft_level.index:
+          keeping.append(node.name)
+    tree.prune(keeping)
+    tree_name = folder+'processing/'+tree_names[a]+'_reduced_tree.txt'
+    tree.write(outfile=tree_name, format=1)
+  tree = Phylo.read(tree_name, "newick")
+  leaves = draw_tree(tree, axes=ax_tree, end_same=True, plot_labels=False)
+  order = []
+  for leaf in leaves[1:]:
+    if leaf[0] in rename_level:
+      tx = ax_tree.text(leaf[1], leaf[2], '  '+rename_level[leaf[0]], va=leaf[4], ha=leaf[5])
+      order.append(rename_level[leaf[0]])
+  ft_level = ft_level.loc[order, :]
+  plt.ylim([0.5, leaves[-1][2]+0.5])
+  rename_sample = {}
+  for col in ft_level.columns:
+    rename_sample[col] = md.loc[int(col), 'Progression']
+  ft_level = ft_level.rename(columns=rename_sample)
+  ft_level_prev = ft_level.copy(deep=True).transpose()
+  ft_level_abun = ft_level.copy(deep=True).transpose()
+  ft_level_prev[ft_level_prev > 0] = 1
+  ft_level_prev = ft_level_prev.groupby(by=ft_level_prev.index, axis=0).mean().transpose().loc[:, ['progression', 'no progression']]
+  ft_level_abun = ft_level_abun.groupby(by=ft_level_abun.index, axis=0).mean().transpose().loc[:, ['progression', 'no progression']]
+  plt.sca(ax_heat_prev)
+  plt.pcolor(ft_level_prev, cmap='PuBu', edgecolor='k')
+  plt.sca(ax_heat_abun)
+  plt.pcolor(ft_level_abun, cmap='OrRd', edgecolor='k')
+  min_prev, max_prev, min_abun, max_abun = min(ft_level_prev.min(axis=1)), max(ft_level_prev.max(axis=1)), min(ft_level_abun.min(axis=1)), max(ft_level_abun.max(axis=1))
+  mid_prev, mid_abun = np.mean([min_prev, max_prev]), np.mean([min_abun, max_abun])
+  mids = [mid_prev, mid_prev, mid_abun, mid_abun]
+  axes = [ax_heat_prev, ax_heat_prev, ax_heat_abun, ax_heat_abun]
+  x = [0.5, 1.5, 0.5, 1.5]
+  for i in range(len(ft_level_prev.index.values)):
+    tax = ft_level_prev.index.values[i]
+    vals = [ft_level_prev.loc[tax, 'progression'], ft_level_prev.loc[tax, 'no progression'], ft_level_abun.loc[tax, 'progression'], ft_level_abun.loc[tax, 'no progression']]
+    cols = ['k', 'k', 'k', 'k']
+    for v in range(len(vals)):
+      if vals[v] >= mids[v]: cols[v] = 'w'
+      axes[v].text(x[v], i+0.5, str(round(vals[v], 2)), ha='center', va='center', color=cols[v])
+  sums = ft_level_abun.sum(axis=0)
+  plt.sca(ax_heat_abun)
+  plt.xticks([0.5, 1.5], [str(round(sums['progression'], 2)), str(round(sums['no progression'], 2))])
+  plt.text(-0.1, -0.01, 'Total\nshown (%)', ha='right', va='top', transform=ax_heat_abun.transAxes)
+
+plt.savefig(folder+'figures/FigureS1.png', dpi=600, bbox_inches='tight')
+#plt.show()
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/FigureS1.png)
+
+## Figure 2
+
+```{python, eval=FALSE}
+plt.figure(figsize=(45,15))
+with open(folder+'processing/tax.dict', 'rb') as f:
+  tax_dict = pickle.load(f)
+with open(folder+'processing/genus.dict', 'rb') as f:
+  genus_dict = pickle.load(f)
+ft = pd.read_csv(ft_relabun_fn, index_col=0, header=0)
+md = pd.read_csv(folder+'OM_metadata.csv', index_col=2, header=0)
+
+ax_class = plt.subplot2grid((30,116),(1,3), colspan=1, rowspan=29)
+ax_tree = plt.subplot2grid((30,29),(1,1), colspan=3, rowspan=29, frameon=False)
+ax_labels = plt.subplot2grid((30,29),(1,4), colspan=3, rowspan=29, frameon=False)
+xtyt = plt.xticks([]), plt.yticks([])
+ax_heat_prev = plt.subplot2grid((30,58),(1,12), colspan=2, rowspan=29)
+xtyt = plt.xticks([]), plt.yticks([])
+ax_heat_abun = plt.subplot2grid((30,58),(1,14), colspan=2, rowspan=29)
+xtyt = plt.xticks([]), plt.yticks([])
+ax_prog_prev = plt.subplot2grid((30,58),(0,12), colspan=2)
+xtyt = plt.xticks([]), plt.yticks([]), plt.title('Prevalence', rotation=45, fontweight='bold')
+ax_prog_abun = plt.subplot2grid((30,58),(0,14), colspan=2)
+xtyt = plt.xticks([]), plt.yticks([]), plt.title('Relative\nabundance (%)', rotation=45, fontweight='bold')
+ax_box = plt.subplot2grid((30,58),(1,16), colspan=10, rowspan=29)
+yt = plt.yticks([])
+prog_axes = [ax_prog_prev, ax_prog_abun]
+for ax in prog_axes:
+  ax.bar([0,1], [1,1], color=[colors['progression'], colors['no progression']], width=1, edgecolor='k')
+  ax.text(0, 0.5, 'P', ha='center', va='center', color='w'), ax.text(1, 0.5, 'NP', ha='center', va='center', color='w')
+  ax.set_xlim([-0.5, 1.5]), ax.set_ylim([0, 1])
+ft_level = ft.copy(deep=True)
+rename_level_opposite = {}
+tree_name = folder+'processing/genus_tree.nwk'
+for row in ft_level.index:
+  rename_level_opposite[genus_dict[row]] = row
+ft_level = ft_level.rename(index=genus_dict)
+ft_level = ft_level.groupby(by=ft_level.index, axis=0).sum()
+ft_group = ft_level.copy(deep=True).transpose()
+rename_samples = {}
+for sample in ft_group.index:
+  rename_samples[sample] = md.loc[int(sample), 'Progression']
+ft_group = ft_group.rename(index=rename_samples)
+ft_group = ft_group.groupby(by=ft_group.index, axis=0).mean().transpose()
+ft_group['Mean'] = ft_group.mean(axis=1)
+ft_group = ft_group.sort_values(by=['Mean'], ascending=False)
+ft_group = ft_group.iloc[:20, :]
+ft_level = ft_level.loc[ft_group.index, :]
+tree = Tree(tree_name, format=1)
+rename_tree_level = {}
+keeping = []
+for node in tree.traverse("postorder"):
+  if node.name in genus_dict:
+    rename_tree_level[genus_dict[node.name]] = node.name
+    if genus_dict[node.name] in ft_level.index:
+      keeping.append(node.name)
+tree.prune(keeping)
+tree_name = folder+'processing/genus_reduced_tree.txt'
+tree.write(outfile=tree_name, format=1)
+tree = Phylo.read(tree_name, "newick")
+leaves = draw_tree(tree, axes=ax_tree, end_same=True, plot_labels=False)
+order = []
+for leaf in leaves[1:]:
+  if leaf[0] in genus_dict:
+    tx = ax_tree.text(leaf[1], leaf[2], '  '+genus_dict[leaf[0]].replace('g__', '').replace('o__', ''), va=leaf[4], ha=leaf[5])
+    order.append(genus_dict[leaf[0]])
+    pl = ax_box.plot([-10, 75], [leaf[2]-0.5, leaf[2]-0.5], 'k-')
+ft_level = ft_level.loc[order, :]
+yl = plt.ylim([0.5, leaves[-1][2]+0.5])
+
+plt.sca(ax_box)
+yl = plt.ylim([-0.5, leaves[-1][2]-0.5])
+xl = plt.xlim([-1, 60])
+
+rename_sample = {}
+for col in ft_level.columns:
+  rename_sample[col] = md.loc[int(col), 'Progression']
+ft_level = ft_level.rename(columns=rename_sample)
+ft_level_prev = ft_level.copy(deep=True).transpose()
+ft_level_abun = ft_level.copy(deep=True).transpose()
+ft_level_prev[ft_level_prev > 0] = 1
+ft_level_prev = ft_level_prev.groupby(by=ft_level_prev.index, axis=0).mean().transpose().loc[:, ['progression', 'no progression']]
+ft_level_abun = ft_level_abun.groupby(by=ft_level_abun.index, axis=0).mean().transpose().loc[:, ['progression', 'no progression']]
+plt.sca(ax_heat_prev)
+hm = plt.pcolor(ft_level_prev, cmap='PuBu', edgecolor='k')
+plt.sca(ax_heat_abun)
+hm = plt.pcolor(ft_level_abun, cmap='OrRd', edgecolor='k')
+min_prev, max_prev, min_abun, max_abun = min(ft_level_prev.min(axis=1)), max(ft_level_prev.max(axis=1)), min(ft_level_abun.min(axis=1)), max(ft_level_abun.max(axis=1))
+mid_prev, mid_abun = np.mean([min_prev, max_prev]), np.mean([min_abun, max_abun])
+mids = [mid_prev, mid_prev, mid_abun, mid_abun]
+axes = [ax_heat_prev, ax_heat_prev, ax_heat_abun, ax_heat_abun]
+x = [0.5, 1.5, 0.5, 1.5]
+for i in range(len(ft_level_prev.index.values)):
+  tax = ft_level_prev.index.values[i]
+  vals = [ft_level_prev.loc[tax, 'progression'], ft_level_prev.loc[tax, 'no progression'], ft_level_abun.loc[tax, 'progression'], ft_level_abun.loc[tax, 'no progression']]
+  cols = ['k', 'k', 'k', 'k']
+  for v in range(len(vals)):
+    if vals[v] >= mids[v]: cols[v] = 'w'
+    tx = axes[v].text(x[v], i+0.5, str(round(vals[v], 2)), ha='center', va='center', color=cols[v])
+sums = ft_level_abun.sum(axis=0)
+plt.sca(ax_heat_abun)
+xt = plt.xticks([0.5, 1.5], [str(round(sums['progression'], 2)), str(round(sums['no progression'], 2))])
+tx = plt.text(-0.1, -0.01, 'Total\nshown (%)', ha='right', va='top', transform=ax_heat_abun.transAxes)
+
+plt.sca(ax_box)
+handles = [Line2D([0], [0], marker='s', color='w', label=name.capitalize().replace('ssion', 'ssor').replace('No ', 'Non-'), markerfacecolor=colors[name], markersize=12) for name in colors]
+lg = plt.legend(handles=handles, loc='upper center', ncol=2, bbox_to_anchor=(0.5, 1.03))
+y = {'progression':0.25, 'no progression':-0.25}
+for a in range(len(order)):
+  vals = {'progression':list(ft_level.loc[order[a], 'progression'].values), 'no progression':list(ft_level.loc[order[a], 'no progression'].values)}
+  for group in vals:
+    box = ax_box.boxplot(vals[group], positions=[a+y[group]], widths=0.3, vert=False, showfliers=False)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: bx = plt.setp(box[item], color='k')
+    scat = plt.scatter(vals[group], np.random.normal(a+y[group], 0.05, len(vals[group])), color=colors[group], alpha=0.5)
+plt.yticks([]), plt.xlabel('Relative abundance (%)')
+for a in [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]:
+  pl = plt.plot([a, a], [-0.5, leaves[-1][2]-0.5], 'k--', alpha=0.1)
+
+plt.sca(ax_class)
+plt.yticks([]), plt.xticks([])
+class_dict = {}
+for asv in tax_dict:
+  tax = tax_dict[asv].split('; ')
+  cls = tax[2]
+  tax = tax[3:-2]
+  for t in tax:
+    class_dict[t] = cls
+
+start, prev = 0, ''
+count = 7
+handles = []
+list_colors = ['#C0392B', '#9B59B6', '#2980B9', '#1ABC9C', '#229954', '#F1C40F', '#E67E22']
+random.shuffle(list_colors)
+for a in range(len(order)):
+  this_class = class_dict[order[a]]
+  if prev != '' and this_class != prev or a == len(order)-1:
+    if a == len(order)-1: a += 1
+    bar = plt.bar([0], [a-start], bottom=[start], edgecolor='k', width=1, alpha=0.3, color=list_colors[7-count])
+    tx = plt.text(0, np.mean([a, start]), str(count), va='center', ha='center')
+    handles.append(Line2D([0], [0], marker='s', color='w', label=str(count)+': '+prev.split('__')[1], markerfacecolor=list_colors[7-count], markersize=12, alpha=0.3))
+    start = a
+    count -= 1
+  prev = this_class
+plt.xlim([-0.5, 0.5]), plt.ylim([0, a])
+handles.reverse()
+plt.legend(handles=handles, loc='upper left', bbox_to_anchor=(-0.05,1.08), ncol=3)
+
+
+plt.savefig(folder+'figures/Figure2.png', dpi=600, bbox_inches='tight')
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/Figure2.png)
+
+### Figure 3
+
+```{python, eval=FALSE}
+groups = ['maaslin_genus_grouped_full_model', 'maaslin_genus_progressors_specific_full_model']
+names = ['Progression (grouped)', 'Progressors only (grouped)']
+
+sig_hits_grouped, sig_hits_specific = {}, {}
+sig_hits = [sig_hits_grouped, sig_hits_specific]
+
+for g in range(len(groups)):
+  group = groups[g]
+  this_df = pd.read_csv(folder+'differential_abundance/'+group+'/significant_results.tsv', index_col=0, header=0, sep='\t')
+  rename_genus = {}
+  for row in this_df.index:
+    if '.' in row:
+      if 'Unclassified' in row: rename_genus[row] = row.replace('.', ' ')
+      else: rename_genus[row] = row.replace('.', '-')
+  this_df = this_df.rename(index=rename_genus)
+  for row in this_df.index:
+    hit = [this_df.loc[row, 'value'],this_df.loc[row, 'coef'], this_df.loc[row, 'qval']]
+    sig_hits[g][row] = hit
+    
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+md.index = md.index.map(str)
+ft = pd.read_csv(genus_relabun_fn, index_col=0, header=0)
+x = {'<1':0, '1<2':3, '2<3':6, '3<4':9, '4<6':12, '>6':15}
+groups = {}
+
+sig = [s for s in sig_hits[0]]
+plt.figure(figsize=(30,30))
+for t in range(len(sig)):
+  ax = plt.subplot(7,3,t+1)
+  plt.sca(ax)
+  plt.title(sig[t], fontweight='bold')
+  vals_x, vals_y = [], []
+  for sample in ft.columns:
+    group = md.loc[sample, 'Time_to_progression_grouped']
+    months = md.loc[sample, 'Total_Number_of_Months_Followed_or_to_Progression']
+    if group == 'NP': continue
+    val = ft.loc[sig[t], sample]
+    val_con = []
+    x_P, x_NP = np.random.normal(x[group], 0.1, 1), np.random.normal( x[group]+1, 0.1, 1)
+    for m in matches_dict[str(sample)]:
+      vcon = ft.loc[sig[t], m]
+      val_con.append(vcon)
+      line = plt.plot([x_P, x_NP], [val, vcon], 'k-', alpha=0.05)
+      scat = plt.scatter(x_NP, vcon, color=colors_time_groups['NP'], alpha=0.5)
+    scat = plt.scatter(x_P, val, color=colors_time_groups[group], alpha=0.5)
+    if group in groups: groups[group] = [groups[group][0]+[val], groups[group][1]+val_con]
+    else: groups[group] = [[val], val_con]
+  for group in groups:
+    box = ax.boxplot(groups[group], positions=[x[group], x[group]+1], widths=0.8, showfliers=False)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: plt.setp(box[item], color='k')
+  string = 'Coefficient='+str(round(sig_hits[0][sig[t]][1], 2))+', $q$='+str(round(sig_hits[0][sig[t]][2], 3))
+  tx = plt.text(0.01, 0.95, string, transform=ax.transAxes, fontsize=14, va='top', ha='left', bbox=props)
+  ti = plt.title(sig[t], fontweight='bold')
+  xticks = []
+  for g in groups:
+    if g[1] == '<': new_g = g.replace('<', '-')
+    else: new_g = g
+    if sig_hits[0][sig[t]][0] == g: new_g = new_g+' *'
+    xticks.append(new_g)
+  plt.xticks([x[g]+0.5 for g in groups], xticks)
+  plt.ylabel('Relative abundance (%)')
+  plt.xlabel('Years to progression')
+  #plt.yscale('symlog')
+
+
+sig = [s for s in sig_hits[1]]
+t1 = t
+for t in range(len(sig)):
+  ax = plt.subplot(7,3,t+2+t1)
+  plt.sca(ax)
+  plt.title(sig[t], fontweight='bold')
+  vals_x, vals_y = [], []
+  for sample in ft.columns:
+    group = md.loc[sample, 'Time_to_progression_grouped']
+    years = md.loc[sample, 'Total_Number_of_Months_Followed_or_to_Progression']/12
+    if group == 'NP': continue
+    val = ft.loc[sig[t], sample]
+    scat = plt.scatter(years, val, color=colors['progression'], alpha=0.5)
+    vals_x.append(years), vals_y.append(val)
+  theta = np.polyfit(vals_x, vals_y, 1)
+  y_line = theta[1] + theta[0] * np.array(vals_x)
+  li = plt.plot(vals_x, y_line, 'k-')
+  string = 'Coefficient='+str(round(sig_hits[1][sig[t]][1], 2))+', $q$='+str(round(sig_hits[1][sig[t]][2], 3))
+  print(sig_hits[1][sig[t]])
+  tx = plt.text(0.01, 0.95, string, transform=ax.transAxes, fontsize=14, va='top', ha='left', bbox=props)
+  ti = plt.title(sig[t], fontweight='bold')
+  plt.ylabel('Relative abundance (%)')
+  plt.xlabel('Years to progression')
+  #plt.yscale('symlog')
+
+
+plt.tight_layout()
+plt.savefig(folder+'figures/Figure3_2.png', dpi=600, bbox_inches='tight')
+# 
+#   
+
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/Figure3_2.png)
+
+```{python, eval=FALSE}
+groups = ['maaslin_genus_grouped_full_model', 'maaslin_genus_progressors_specific_full_model']
+names = ['Progression (grouped)', 'Progressors only (grouped)']
+
+sig_hits_grouped, sig_hits_specific = {}, {}
+sig_hits = [sig_hits_grouped, sig_hits_specific]
+
+for g in range(len(groups)):
+  group = groups[g]
+  this_df = pd.read_csv(folder+'differential_abundance/'+group+'/significant_results.tsv', index_col=0, header=0, sep='\t')
+  rename_genus = {}
+  for row in this_df.index:
+    if '.' in row:
+      if 'Unclassified' in row: rename_genus[row] = row.replace('.', ' ')
+      else: rename_genus[row] = row.replace('.', '-')
+  this_df = this_df.rename(index=rename_genus)
+  for row in this_df.index:
+    hit = [this_df.loc[row, 'value'],this_df.loc[row, 'coef'], this_df.loc[row, 'qval']]
+    sig_hits[g][row] = hit
+    
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+md.index = md.index.map(str)
+ft = pd.read_csv(genus_relabun_fn, index_col=0, header=0)
+x = {'<1':0, '1<2':3, '2<3':6, '3<4':9, '4<6':12, '>6':15}
+
+sig = [s for s in sig_hits[0]]
+print(sig_hits[0])
+plt.figure(figsize=(10,10))
+for t in range(len(sig)):
+  ax = plt.subplot(3,3,t+1)
+  plt.sca(ax)
+  plt.title(sig[t], fontweight='bold')
+  vals_x, vals_y = [], []
+  plotting_x = []
+  groups = {}
+  for sample in ft.columns:
+    group = md.loc[sample, 'Time_to_progression_grouped']
+    months = md.loc[sample, 'Total_Number_of_Months_Followed_or_to_Progression']
+    if group != sig_hits[0][sig[t]][0]: continue
+    if group == 'NP': continue
+    print(sig_hits[0][sig[t]][0], group)
+    plotting_x.append(group)
+    val = ft.loc[sig[t], sample]
+    val_con = []
+    x_P, x_NP = np.random.normal(x[group], 0.1, 1), np.random.normal( x[group]+1, 0.1, 1)
+    for m in matches_dict[str(sample)]:
+      vcon = ft.loc[sig[t], m]
+      val_con.append(vcon)
+      line = plt.plot([x_P, x_NP], [val, vcon], 'k-', alpha=0.05)
+      scat = plt.scatter(x_NP, vcon, color=colors_time_groups['NP'], alpha=0.5)
+    scat = plt.scatter(x_P, val, color=colors['progression'], alpha=0.5)
+    if group in groups: groups[group] = [groups[group][0]+[val], groups[group][1]+val_con]
+    else: groups[group] = [[val], val_con]
+  for group in groups:
+    box = ax.boxplot(groups[group], positions=[x[group], x[group]+1], widths=0.8, showfliers=False)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: sp = plt.setp(box[item], color='k')
+  print(groups)
+  string = 'Coefficient='+str(round(sig_hits[0][sig[t]][1], 2))+', $q$='+str(round(sig_hits[0][sig[t]][2], 3))
+  tx = plt.text(0.01, 0.95, string, transform=ax.transAxes, fontsize=10, va='top', ha='left', bbox=props)
+  ti = plt.title(sig[t], fontweight='bold')
+  xticks = []
+  for g in groups:
+    if g[1] == '<': new_g = g.replace('<', '-')
+    else: new_g = g
+    xticks.append(new_g)
+  xt = [x[g] for g in groups]
+  xt = plt.xticks([xt[0], xt[0]+1], ['P', 'NP'])
+  yl = plt.ylabel('Relative abundance (%)')
+  xl = plt.xlabel(xticks[0]+' years to progression')
+  #plt.yscale('symlog')
+  
+
+
+
+sig = [s for s in sig_hits[1]]
+
+for t in range(len(sig)):
+  ax = plt.subplot(3,2,t+3)
+  plt.sca(ax)
+  plt.title(sig[t], fontweight='bold')
+  vals_x, vals_y = [], []
+  for sample in ft.columns:
+    group = md.loc[sample, 'Time_to_progression_grouped']
+    years = md.loc[sample, 'Total_Number_of_Months_Followed_or_to_Progression']/12
+    if group == 'NP': continue
+    val = ft.loc[sig[t], sample]
+    scat = plt.scatter(years, val, color=colors['progression'], alpha=0.5)
+    vals_x.append(years), vals_y.append(val)
+  theta = np.polyfit(vals_x, vals_y, 1)
+  y_line = theta[1] + theta[0] * np.array(vals_x)
+  li = plt.plot(vals_x, y_line, 'k-')
+  string = 'Coefficient='+str(round(sig_hits[1][sig[t]][1], 2))+', $q$='+str(round(sig_hits[1][sig[t]][2], 3))
+  tx = plt.text(0.01, 0.95, string, transform=ax.transAxes, fontsize=10, va='top', ha='left', bbox=props)
+  ti = plt.title(sig[t], fontweight='bold')
+  yl = plt.ylabel('Relative abundance (%)')
+  xl = plt.xlabel('Years to progression')
+  #plt.yscale('symlog')
+
+
+plt.subplots_adjust(hspace=0.5)
+plt.savefig(folder+'figures/Figure3_3.png', dpi=600, bbox_inches='tight')
+# 
+#   
+
+```
+
+(The version used in the manuscript)
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/Figure3_3.png)
+
+### Figure S2
+
+
+```{python, eval=FALSE}
+groups = ['maaslin_ASV_grouped_full_model', 'maaslin_ASV_progressors_specific_full_model']
+names = ['Progression (grouped)', 'Progressors only (grouped)']
+
+sig_hits_grouped, sig_hits_specific = {}, {}
+sig_hits = [sig_hits_grouped, sig_hits_specific]
+
+with open(folder+'processing/tax.dict', 'rb') as f:
+  tax_dict = pickle.load(f)
+  
+with open(folder+'processing/matches.dict', 'rb') as f:
+    matches_dict = pickle.load(f)
+
+for g in range(len(groups)):
+  group = groups[g]
+  this_df = pd.read_csv(folder+'differential_abundance/'+group+'/significant_results.tsv', index_col=0, header=0, sep='\t')
+  for row in this_df.index:
+    if list(this_df.index.values).count(row) > 1:
+      hit = [list(this_df.loc[row, 'value'].values), list(this_df.loc[row, 'coef'].values), list(this_df.loc[row, 'qval'].values)]
+    else:
+      hit = [[this_df.loc[row, 'value']], [this_df.loc[row, 'coef']], [this_df.loc[row, 'qval']]]
+    if row[0] == 'X': row = row[1:]
+    sig_hits[g][row] = hit
+    
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+md = pd.read_csv(folder+'OM_metadata_groups.csv', index_col=0, header=0)
+md.index = md.index.map(str)
+ft = pd.read_csv(ft_relabun_fn, index_col=0, header=0)
+
+sig = [s for s in sig_hits[0]]
+print(sig_hits[0])
+plt.figure(figsize=(20,30))
+for t in range(len(sig)):
+  ax = plt.subplot(7,5,t+1)
+  plt.sca(ax)
+  ti = plt.title(sig[t], fontweight='bold')
+  groups, x_group = {}, {}
+  count = 0
+  xticks, group_ticks = [[], []], [[], []]
+  for hit in sig_hits[0][sig[t]][0]:
+    for sample in ft.columns:
+      group = md.loc[sample, 'Time_to_progression_grouped']
+      if hit == 'NP':
+        if group != 'NP':
+          val = ft.loc[sig[t], sample]
+          val_con = []
+          x_P, x_NP = np.random.normal(count, 0.1, 1), np.random.normal(count+1, 0.1, 1)
+          for m in matches_dict[str(sample)]:
+            vcon = ft.loc[sig[t], m]
+            val_con.append(vcon)
+            line = plt.plot([x_P, x_NP], [val, vcon], 'k-', alpha=0.05)
+            scat = plt.scatter(x_NP, vcon, color=colors['no progression'], alpha=0.5)
+          scat = plt.scatter(x_P, val, color=colors['progression'], alpha=0.5)
+        else: continue
+      elif group == hit:
+        val = ft.loc[sig[t], sample]
+        val_con = []
+        x_P, x_NP = np.random.normal(count, 0.1, 1), np.random.normal(count+1, 0.1, 1)
+        for m in matches_dict[str(sample)]:
+          vcon = ft.loc[sig[t], m]
+          val_con.append(vcon)
+          line = plt.plot([x_P, x_NP], [val, vcon], 'k-', alpha=0.05)
+          scat = plt.scatter(x_NP, vcon, color=colors['no progression'], alpha=0.5)
+        scat = plt.scatter(x_P, val, color=colors['progression'], alpha=0.5)
+      else: continue
+      if hit in groups: groups[hit] = [groups[hit][0]+[val], groups[hit][1]+val_con]
+      else: 
+        groups[hit] = [[val], val_con]
+        x_group[hit] = count
+        xticks[0] = xticks[0]+[count, count+1]
+        xticks[1] = xticks[1]+['P', 'NP']
+        group_ticks[0].append(count+0.5), group_ticks[1].append(hit)
+    count += 3
+  for group in groups:
+    box = ax.boxplot(groups[group], positions=[x_group[group], x_group[group]+1], widths=0.8, showfliers=False)
+    for item in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']: sp = plt.setp(box[item], color='k')
+  # string = ''
+  # for a in range(len(sig_hits[0][sig[t]][1])):
+  #   if string != '': string += '\n'
+  #   string += sig_hits[0][sig[t]][0][a]+': Coefficient='+str(round(sig_hits[0][sig[t]][1][a], 2))+', $q$='+str(round(sig_hits[0][sig[t]][2][a], 3))
+  # tx = plt.text(0.01, 0.95, string, transform=ax.transAxes, fontsize=10, va='top', ha='left', bbox=props)
+  xt = plt.xticks(xticks[0], xticks[1])
+  if len(sig_hits[0][sig[t]][0]) == 1:
+    hit = sig_hits[0][sig[t]][0][0]
+    if hit == 'NP': string = 'Years to progression (Overall)'
+    elif hit[1] == '<': 
+      hit = hit.replace('<', '-')
+      string = hit+' years to progression'
+    else: string = 'Years to progression'
+    coef_string = 'Coefficient='+str(round(sig_hits[0][sig[t]][1][0], 2))+', $q$='+str(round(sig_hits[0][sig[t]][2][0], 3))
+    tx = plt.text(0.05, 0.95, coef_string, transform=ax.transAxes, fontsize=10, va='top', ha='left', bbox=props)
+  else:
+    for v in range(len(group_ticks[0])):
+      name = group_ticks[1][v]
+      if name == 'NP': name = 'Overall'
+      if t == 0: 
+        y = -1.2
+        string = '\nYears to progression'
+      else: 
+        y = -2.2
+        string = '\nYears to progression'
+      plt.text(group_ticks[0][v], y, name, ha='center', va='top')
+  xl = plt.xlabel(string)
+  if t % 5 == 0: yl = plt.ylabel('Relative abundance (%)')
+  tax = tax_dict[sig[t]].split('; ')
+  ti = plt.title(tax[-1]+'\n'+tax[-2], fontweight='bold')
+  # #plt.yscale('symlog')
+
+
+
+
+sig = [s for s in sig_hits[1]]
+
+for t in range(len(sig)):
+  ax = plt.subplot(7,2,t+7)
+  plt.sca(ax)
+  plt.title(sig[t], fontweight='bold')
+  vals_x, vals_y = [], []
+  for sample in ft.columns:
+    group = md.loc[sample, 'Time_to_progression_grouped']
+    years = md.loc[sample, 'Total_Number_of_Months_Followed_or_to_Progression']/12
+    if group == 'NP': continue
+    val = ft.loc[sig[t], sample]
+    scat = plt.scatter(years, val, color=colors['progression'], alpha=0.5)
+    vals_x.append(years), vals_y.append(val)
+  theta = np.polyfit(vals_x, vals_y, 1)
+  y_line = theta[1] + theta[0] * np.array(vals_x)
+  li = plt.plot(vals_x, y_line, 'k-')
+  string = 'Coefficient='+str(round(sig_hits[1][sig[t]][1][0], 2))+', $q$='+str(round(sig_hits[1][sig[t]][2][0], 3))
+  tx = plt.text(0.02, 0.95, string, transform=ax.transAxes, fontsize=10, va='top', ha='left', bbox=props)
+  tax = tax_dict[sig[t]].split('; ')
+  ti = plt.title(tax[-1]+'\n'+tax[-2], fontweight='bold')
+  if t%2 == 0: yl = plt.ylabel('Relative abundance (%)')
+  xl = plt.xlabel('Years to progression')
+  #plt.yscale('symlog')
+
+
+plt.subplots_adjust(hspace=0.5)
+plt.savefig(folder+'figures/FigureS2.png', dpi=600, bbox_inches='tight')
+
+
+```
+
+![](/Users/robynwright/Dropbox/Langille_Lab_postdoc/OED_project/analysis/figures/FigureS2.png)

@@ -1,0 +1,63 @@
+"","taxa_id","W","detected_0.9","detected_0.8","detected_0.7","detected_0.6"
+"1","g__Abiotrophia",0,FALSE,FALSE,FALSE,FALSE
+"2","g__Absconditabacteriales_(SR1)",0,FALSE,FALSE,FALSE,FALSE
+"3","g__Actinobacillus",2,FALSE,FALSE,FALSE,FALSE
+"4","g__Actinomyces",0,FALSE,FALSE,FALSE,FALSE
+"5","g__Aggregatibacter",3,FALSE,FALSE,FALSE,FALSE
+"6","g__Alloprevotella",0,FALSE,FALSE,FALSE,FALSE
+"7","g__Atopobium",0,FALSE,FALSE,FALSE,FALSE
+"8","g__Bergeyella",0,FALSE,FALSE,FALSE,FALSE
+"9","g__Bradyrhizobium",0,FALSE,FALSE,FALSE,FALSE
+"10","g__Burkholderia-Caballeronia-Paraburkholderia",1,FALSE,FALSE,FALSE,FALSE
+"11","g__Campylobacter",0,FALSE,FALSE,FALSE,FALSE
+"12","g__Capnocytophaga",53,FALSE,TRUE,TRUE,TRUE
+"13","g__Cardiobacterium",51,FALSE,TRUE,TRUE,TRUE
+"14","g__Catonella",0,FALSE,FALSE,FALSE,FALSE
+"15","g__Centipeda",0,FALSE,FALSE,FALSE,FALSE
+"16","g__Clostridia_UCG-014",1,FALSE,FALSE,FALSE,FALSE
+"17","g__Corynebacterium",0,FALSE,FALSE,FALSE,FALSE
+"18","g__Cutibacterium",0,FALSE,FALSE,FALSE,FALSE
+"19","g__Dialister",0,FALSE,FALSE,FALSE,FALSE
+"20","g__Eikenella",1,FALSE,FALSE,FALSE,FALSE
+"21","g__F0058 f__Paludibacteraceae",0,FALSE,FALSE,FALSE,FALSE
+"22","g__F0332 f__Actinomycetaceae",0,FALSE,FALSE,FALSE,FALSE
+"23","g__Fretibacterium",0,FALSE,FALSE,FALSE,FALSE
+"24","g__Fusobacterium",1,FALSE,FALSE,FALSE,FALSE
+"25","g__Gemella",7,FALSE,FALSE,FALSE,FALSE
+"26","g__Granulicatella",0,FALSE,FALSE,FALSE,FALSE
+"27","g__Haemophilus",5,FALSE,FALSE,FALSE,FALSE
+"28","g__Kingella",0,FALSE,FALSE,FALSE,FALSE
+"29","g__Lachnoanaerobaculum",4,FALSE,FALSE,FALSE,FALSE
+"30","g__Lautropia",0,FALSE,FALSE,FALSE,FALSE
+"31","g__Leptotrichia",0,FALSE,FALSE,FALSE,FALSE
+"32","g__Megasphaera",0,FALSE,FALSE,FALSE,FALSE
+"33","g__Mogibacterium",0,FALSE,FALSE,FALSE,FALSE
+"34","g__Neisseria",0,FALSE,FALSE,FALSE,FALSE
+"35","g__Oribacterium",0,FALSE,FALSE,FALSE,FALSE
+"36","g__P5D1-392 o__Lactobacillales",0,FALSE,FALSE,FALSE,FALSE
+"37","g__Parvimonas",0,FALSE,FALSE,FALSE,FALSE
+"38","g__Porphyromonas",0,FALSE,FALSE,FALSE,FALSE
+"39","g__Prevotella",0,FALSE,FALSE,FALSE,FALSE
+"40","g__Pseudopropionibacterium",0,FALSE,FALSE,FALSE,FALSE
+"41","g__Ralstonia",0,FALSE,FALSE,FALSE,FALSE
+"42","g__Rothia",0,FALSE,FALSE,FALSE,FALSE
+"43","g__Saccharimonadaceae",0,FALSE,FALSE,FALSE,FALSE
+"44","g__Saccharimonadales",0,FALSE,FALSE,FALSE,FALSE
+"45","g__Schlegelella",1,FALSE,FALSE,FALSE,FALSE
+"46","g__Selenomonas",0,FALSE,FALSE,FALSE,FALSE
+"47","g__Solobacterium",0,FALSE,FALSE,FALSE,FALSE
+"48","g__Sphingomonas",0,FALSE,FALSE,FALSE,FALSE
+"49","g__Staphylococcus",0,FALSE,FALSE,FALSE,FALSE
+"50","g__Stomatobaculum",0,FALSE,FALSE,FALSE,FALSE
+"51","g__Streptococcus",0,FALSE,FALSE,FALSE,FALSE
+"52","g__TM7a f__Saccharimonadaceae",0,FALSE,FALSE,FALSE,FALSE
+"53","g__TM7x f__Saccharimonadaceae",0,FALSE,FALSE,FALSE,FALSE
+"54","g__Tannerella",7,FALSE,FALSE,FALSE,FALSE
+"55","g__Treponema",0,FALSE,FALSE,FALSE,FALSE
+"56","g__Unclassified c__Actinobacteria",0,FALSE,FALSE,FALSE,FALSE
+"57","g__Unclassified f__Rhizobiaceae",0,FALSE,FALSE,FALSE,FALSE
+"58","g__Unclassified f__Selenomonadaceae",0,FALSE,FALSE,FALSE,FALSE
+"59","g__Unclassified o__Lactobacillales",0,FALSE,FALSE,FALSE,FALSE
+"60","g__Veillonella",0,FALSE,FALSE,FALSE,FALSE
+"61","g__[Eubacterium]_nodatum_group",0,FALSE,FALSE,FALSE,FALSE
+"62","g__uncultured f__Caulobacteraceae",0,FALSE,FALSE,FALSE,FALSE

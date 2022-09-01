@@ -1,0 +1,84 @@
+2022-07-15 10:42:19 INFO::Writing function arguments to log file
+2022-07-15 10:42:19 DEBUG::Function arguments
+2022-07-15 10:42:19 DEBUG::Output folder: /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_family
+2022-07-15 10:42:19 DEBUG::Min Abundance: 0.000000
+2022-07-15 10:42:19 DEBUG::Min Prevalence: 0.100000
+2022-07-15 10:42:19 DEBUG::Normalization: TSS
+2022-07-15 10:42:19 DEBUG::Transform: AST
+2022-07-15 10:42:19 DEBUG::Analysis method: LM
+2022-07-15 10:42:19 DEBUG::Max significance: 0.250000
+2022-07-15 10:42:19 DEBUG::Random effects:
+2022-07-15 10:42:19 DEBUG::Fixed effects: Progression
+2022-07-15 10:42:19 DEBUG::Correction method: BH
+2022-07-15 10:42:19 DEBUG::Standardize: FALSE
+2022-07-15 10:42:19 DEBUG::Cores: 1
+2022-07-15 10:42:19 INFO::Verifying options selected are valid
+2022-07-15 10:42:19 INFO::Determining format of input files
+2022-07-15 10:42:19 INFO::Input format is data samples as rows and metadata samples as rows
+2022-07-15 10:42:19 DEBUG::A total of 90 samples were found in both the data and metadata
+2022-07-15 10:42:19 DEBUG::Reordering data/metadata to use same sample ordering
+2022-07-15 10:42:19 INFO::Formula for fixed effects: expr ~  Progression
+2022-07-15 10:42:19 INFO::Filter data based on min abundance and min prevalence
+2022-07-15 10:42:19 INFO::Total samples in data: 90
+2022-07-15 10:42:19 INFO::Min samples required with min abundance for a feature not to be filtered: 9.000000
+2022-07-15 10:42:19 INFO::Total filtered features: 76
+2022-07-15 10:42:19 INFO::Filtered feature names from abundance and prevalence filtering: f__0319.6G20, f__Acetobacteraceae, f__Anaerolineaceae, f__Armatimonadaceae, f__Babeliales, f__Bacteroidaceae, f__Bacteroidales_Incertae_Sedis, f__Beijerinckiaceae, f__Candidatus_Amesbacteria, f__Candidatus_Kaiserbacteria, f__Candidatus_Nomurabacteria, f__Candidatus_Zambryskibacteria, f__Chitinophagaceae, f__DEV007, f__Defluviitaleaceae, f__Deinococcaceae, f__Dermacoccaceae, f__Desulfobulbaceae, f__Devosiaceae, f__Dysgonomonadaceae, f__Enterococcaceae, f__Erysipelatoclostridiaceae, f__Ethanoligenenaceae, f__Geminicoccaceae, f__Gemmataceae, f__Helicobacteraceae, f__Hydrogenophilaceae, f__Ilumatobacteraceae, f__JG30.KF.CM45, f__JGI_0000069.P22, f__Lactobacillaceae, f__Lentimicrobiaceae, f__Methylophilaceae, f__Microbacteriaceae, f__Mycoplasmataceae, f__NS11.12_marine_group, f__NS9_marine_group, f__Nocardiaceae, f__Nocardioidaceae, f__Nostocaceae, f__Obscuribacteraceae, f__Oxalobacteraceae, f__Parcubacteria, f__Peptococcaceae, f__Phormidiaceae, f__Planococcaceae, f__Polyangiaceae, f__Pseudomonadaceae, f__Pseudonocardiaceae, f__RF39, f__Reyranellaceae, f__Rhizobiales_Incertae_Sedis, f__Rhodobacteraceae, f__Rhodocyclaceae, f__Rickettsiaceae, f__Rikenellaceae, f__Rubritaleaceae, f__Rubrobacteriaceae, f__Saprospiraceae, f__Sphingobacteriaceae, f__Spirosomaceae, f__Streptomycetaceae, f__Thermaceae, f__Thermaerobacteraceae, f__Thermicanaceae, f__Unclassified.c__Bacilli, f__Unclassified.c__Cyanobacteriia, f__Unclassified.c__Gammaproteobacteria, f__Unclassified.c__Parcubacteria, f__Unclassified.o__Babeliales, f__Unclassified.o__Bacteroidales, f__Unclassified.o__Chthoniobacterales, f__Unclassified.o__Fusobacteriales, f__Unclassified.o__Rhizobiales, f__env.OPS_17, f__uncultured
+2022-07-15 10:42:19 INFO::Total filtered features with variance filtering: 0
+2022-07-15 10:42:19 INFO::Filtered feature names from variance filtering:
+2022-07-15 10:42:19 INFO::Running selected normalization method: TSS
+2022-07-15 10:42:19 INFO::Bypass z-score application to metadata
+2022-07-15 10:42:19 INFO::Running selected transform method: AST
+2022-07-15 10:42:19 INFO::Running selected analysis method: LM
+2022-07-15 10:42:19 INFO::Fitting model to feature number 1, f__Absconditabacteriales_.SR1.
+2022-07-15 10:42:19 INFO::Fitting model to feature number 2, f__Actinomycetaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 3, f__Aerococcaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 4, f__Anaerovoracaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 5, f__Atopobiaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 6, f__Bacillaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 7, f__Bifidobacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 8, f__Burkholderiaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 9, f__Campylobacteraceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 10, f__Cardiobacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 11, f__Carnobacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 12, f__Caulobacteraceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 13, f__Clostridia_UCG.014
+2022-07-15 10:42:19 INFO::Fitting model to feature number 14, f__Comamonadaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 15, f__Corynebacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 16, f__Erysipelotrichaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 17, f__Flavobacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 18, f__Fusobacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 19, f__Gemellaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 20, f__Lachnospiraceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 21, f__Leptotrichiaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 22, f__Micrococcaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 23, f__Moraxellaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 24, f__Neisseriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 25, f__P5D1.392
+2022-07-15 10:42:19 INFO::Fitting model to feature number 26, f__Paludibacteraceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 27, f__Pasteurellaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 28, f__Peptostreptococcaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 29, f__Peptostreptococcales.Tissierellales
+2022-07-15 10:42:19 INFO::Fitting model to feature number 30, f__Porphyromonadaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 31, f__Prevotellaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 32, f__Propionibacteriaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 33, f__Rhizobiaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 34, f__Saccharimonadaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 35, f__Saccharimonadales
+2022-07-15 10:42:19 INFO::Fitting model to feature number 36, f__Selenomonadaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 37, f__Sphingomonadaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 38, f__Spirochaetaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 39, f__Staphylococcaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 40, f__Streptococcaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 41, f__Synergistaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 42, f__Tannerellaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 43, f__Unclassified.c__Actinobacteria
+2022-07-15 10:42:19 INFO::Fitting model to feature number 44, f__Unclassified.o__Lactobacillales
+2022-07-15 10:42:19 INFO::Fitting model to feature number 45, f__Veillonellaceae
+2022-07-15 10:42:19 INFO::Fitting model to feature number 46, f__Weeksellaceae
+2022-07-15 10:42:20 INFO::Fitting model to feature number 47, f__Xanthobacteraceae
+2022-07-15 10:42:20 INFO::Fitting model to feature number 48, f__Xanthomonadaceae
+2022-07-15 10:42:20 INFO::Counting total values for each feature
+2022-07-15 10:42:20 INFO::Writing residuals to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_family/residuals.rds
+2022-07-15 10:42:20 INFO::Writing fitted values to file /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_family/fitted.rds
+2022-07-15 10:42:20 INFO::Writing all results to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_family/all_results.tsv
+2022-07-15 10:42:20 INFO::Writing the significant results (those which are less than or equal to the threshold of 0.250000 ) to file (ordered by increasing q-values): /Users/robynwright/Dropbox/Langille_Lab_postdoc/Leigha_Rock_project/analysis/processing/maaslin_family/significant_results.tsv

@@ -1,0 +1,91 @@
+study_ID	Progression
+1431	no progression
+3217	no progression
+1133	progression
+3049	no progression
+3063	no progression
+3090	progression
+1351	no progression
+2028	no progression
+1167	progression
+1035	no progression
+1072	no progression
+1244	progression
+3222	no progression
+8288	no progression
+1343	progression
+1314	no progression
+1512	no progression
+1347	progression
+1630	no progression
+1818	no progression
+1368	progression
+1650	no progression
+3053	no progression
+1386	progression
+1574	no progression
+3059	no progression
+1441	progression
+1163	no progression
+1552	no progression
+1457	progression
+1607	no progression
+1806	no progression
+1466	progression
+1365	no progression
+2024	no progression
+1488	progression
+1655	no progression
+1661	no progression
+1496	progression
+1380	no progression
+1560	no progression
+1585	progression
+3021	no progression
+3052	no progression
+1608	progression
+1667	no progression
+2118	no progression
+1758	progression
+1825	no progression
+1913	no progression
+1774	progression
+1864	no progression
+3040	no progression
+1799	progression
+1639	no progression
+2074	no progression
+1871	progression
+1876	no progression
+3073	no progression
+1972	progression
+3003	no progression
+3022	no progression
+1973	progression
+2088	no progression
+2137	no progression
+2104	progression
+1822	no progression
+3046	no progression
+2108	progression
+3011	no progression
+3213	no progression
+3068	progression
+3024	no progression
+3031	no progression
+3080	progression
+3036	no progression
+3048	no progression
+3128	progression
+3060	no progression
+3086	no progression
+3162	progression
+3087	no progression
+8223	no progression
+3173	progression
+3012	no progression
+3191	no progression
+3201	progression
+1493	no progression
+1730	no progression
+8876	progression
